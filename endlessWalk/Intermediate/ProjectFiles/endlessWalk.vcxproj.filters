@@ -36,12 +36,6 @@
     <ClCompile Include="..\..\Source\endlessWalk\ATileManager.h">
       <Filter>Source\endlessWalk</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\endlessWalk\AWaterSplineManager.cpp">
-      <Filter>Source\endlessWalk</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\endlessWalk\AWaterSplineManager.h">
-      <Filter>Source\endlessWalk</Filter>
-    </ClCompile>
     <None Include="..\..\Source\endlessWalk\endlessWalk.Build.cs">
       <Filter>Source\endlessWalk</Filter>
     </None>
