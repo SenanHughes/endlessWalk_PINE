@@ -11,6 +11,7 @@
     <None Include="..\..\Source\endlessWalkEditor.Target.cs">
       <Filter>Source</Filter>
     </None>
+    <None Include="..\..\.vsconfig" />
     <Filter Include="Config">
       <UniqueIdentifier>{FA535FFB-25E1-3D20-B416-52F9BE21E06E}</UniqueIdentifier>
     </Filter>
@@ -29,6 +30,18 @@
     <Filter Include="Source\endlessWalk">
       <UniqueIdentifier>{38AA38DA-BFD3-399C-BABC-DA023294D72D}</UniqueIdentifier>
     </Filter>
+    <ClCompile Include="..\..\Source\endlessWalk\ATileManager.cpp">
+      <Filter>Source\endlessWalk</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\endlessWalk\ATileManager.h">
+      <Filter>Source\endlessWalk</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\endlessWalk\AWaterSplineManager.cpp">
+      <Filter>Source\endlessWalk</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\endlessWalk\AWaterSplineManager.h">
+      <Filter>Source\endlessWalk</Filter>
+    </ClCompile>
     <None Include="..\..\Source\endlessWalk\endlessWalk.Build.cs">
       <Filter>Source\endlessWalk</Filter>
     </None>
