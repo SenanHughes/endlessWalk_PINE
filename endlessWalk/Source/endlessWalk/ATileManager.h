@@ -4,6 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "WaterBodyRiverActor.h"        // To get the AWaterBodyRiver actor
+#include "WaterBodyRiverComponent.h"    // To modify the river's spline"
+#include "WaterSplineComponent.h" // To directly interact with the spline
 #include "ATileManager.generated.h"
 
 UCLASS()
@@ -26,6 +29,8 @@ public:
     // Function to spawn a tile
     void SpawnTile(const FVector& SpawnLocation);
 
+    void AdjustSplinePoint(int32 PointIndex, FVector NewLocation);
+
     // Blueprint tile to spawn (greybox tile)
     UPROPERTY(EditAnywhere, Category = "Tile Spawning")
     TSubclassOf<AActor> TileBlueprint;
@@ -33,6 +38,9 @@ public:
     // Distance threshold for spawning a new tile
     UPROPERTY(EditAnywhere, Category = "Tile Spawning")
     float SpawnThreshold;
+
+    UPROPERTY(EditAnywhere, Category = "River")
+    AWaterBodyRiver* WaterBodyRiver;  // Reference to the WaterBodyRiver actor
 
     // Store the last spawn location for reference
     FVector LastSpawnLocation;
