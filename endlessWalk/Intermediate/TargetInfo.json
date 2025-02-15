@@ -1,0 +1,14 @@
+{
+	"Targets": [
+		{
+			"Name": "endlessWalk",
+			"Path": "..\\Source\\endlessWalk.Target.cs",
+			"Type": "Game"
+		},
+		{
+			"Name": "endlessWalkEditor",
+			"Path": "..\\Source\\endlessWalkEditor.Target.cs",
+			"Type": "Editor"
+		}
+	]
+}
