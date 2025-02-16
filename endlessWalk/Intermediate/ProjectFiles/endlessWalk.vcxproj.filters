@@ -30,12 +30,6 @@
     <Filter Include="Source\endlessWalk">
       <UniqueIdentifier>{38AA38DA-BFD3-399C-BABC-DA023294D72D}</UniqueIdentifier>
     </Filter>
-    <ClCompile Include="..\..\Source\endlessWalk\ATileManager.cpp">
-      <Filter>Source\endlessWalk</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\endlessWalk\ATileManager.h">
-      <Filter>Source\endlessWalk</Filter>
-    </ClCompile>
     <None Include="..\..\Source\endlessWalk\endlessWalk.Build.cs">
       <Filter>Source\endlessWalk</Filter>
     </None>
@@ -44,6 +38,18 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\endlessWalk\endlessWalk.h">
       <Filter>Source\endlessWalk</Filter>
+    </ClCompile>
+    <Filter Include="Source\endlessWalk\Private">
+      <UniqueIdentifier>{6DDC7403-81B2-3B40-9C59-87CED5F1F820}</UniqueIdentifier>
+    </Filter>
+    <ClCompile Include="..\..\Source\endlessWalk\Private\TerrainGenerator.cpp">
+      <Filter>Source\endlessWalk\Private</Filter>
+    </ClCompile>
+    <Filter Include="Source\endlessWalk\Public">
+      <UniqueIdentifier>{CCCE0563-1181-3237-98A9-FF7FC3A4F2E6}</UniqueIdentifier>
+    </Filter>
+    <ClCompile Include="..\..\Source\endlessWalk\Public\TerrainGenerator.h">
+      <Filter>Source\endlessWalk\Public</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
