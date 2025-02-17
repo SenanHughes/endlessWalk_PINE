@@ -18,12 +18,9 @@ ATerrainGenerator::ATerrainGenerator()
 	RootComponent = Spline;
 
 	// Initialise default values
-	NoiseFrequency = 0.1f;
+	NoiseFrequency = 1.0f;
 	NoiseAmplitude = 50.0f;
 	MaxSplineLength = 10000.0f;
-	CurrentSplineLength = 0.0f;
-	SplineIndex = 0;
-	booltest = false;
 }
 
 // Called when the game starts or when spawned
@@ -38,7 +35,7 @@ void ATerrainGenerator::BeginPlay()
 		Spline->ClearSplinePoints();
 
 		// Create spline points at the required distances (e.g., a 10,000-unit long spline)
-		const int32 NumPoints = 50;  // Number of spline points
+		const int32 NumPoints = 10;  // Number of spline points
 		const float SplineLength = 10000.0f;
 		const float Step = SplineLength / (NumPoints);
 
@@ -95,8 +92,6 @@ void ATerrainGenerator::InitialiseTerrainMesh()
 		FVector Position = SplinePoints[i];
 		float Deformation = GenerateNoise(Position.X, Position.Y);  // Generate noise-based deformation
 		AddTerrainPlane(i, Position, FVector(1.0f, 1.0f, 1.0f), Deformation);
-
-		UE_LOG(LogTemp, Warning, TEXT("Position: %s"), *Position.ToString());
 	}
 }
 
@@ -104,16 +99,8 @@ void ATerrainGenerator::InitialiseTerrainMesh()
 // Updates the terrain mesh based on the current spline
 void ATerrainGenerator::UpdateTerrainMesh()
 {
-
-	//FVector LastSplinePointPosition = Spline->GetLocationAtSplinePoint(Spline->GetNumberOfSplinePoints() - 1, ESplineCoordinateSpace::Local);
-	//LastSplinePointPosition = LastSplinePointPosition + FVector(0.0f, 0.005f, 0.0f);
-	//Spline->SetLocationAtSplinePoint(Spline->GetNumberOfSplinePoints() - 1, LastSplinePointPosition, ESplineCoordinateSpace::Local);
-	
-	UStaticMeshComponent* LastPlane = TerrainPlanes.Last();
-	UE_LOG(LogTemp, Warning, TEXT("LastPlane: %s"), *LastPlane->GetComponentLocation().ToString());
-
-	//LastPlane->SetRelativeTransform(FTransform(LastSplinePointPosition));
-
+	// Get the last terrain plane
+	UStaticMeshComponent* MidPlane = TerrainPlanes[TerrainPlanes.Num() / 2];
 
 	int32 NumPoints = Spline->GetNumberOfSplinePoints();
 
@@ -126,10 +113,8 @@ void ATerrainGenerator::UpdateTerrainMesh()
 	// Calculate the halfway point along the spline
 	float HalfwayPoint = TotalLength / 2.0f;
 
-
-
 	// Check if the character is at or beyond the halfway point (5,000 units in this case)
-	if (CharacterLocation.X >= LastPlane->GetComponentLocation().X)
+	if (CharacterLocation.X >= MidPlane->GetComponentLocation().X)
 	{
 		TerrainPlanes[0]->DestroyComponent();  // Destroy the first plane
 		TerrainPlanes.RemoveAt(0); // Remove from the array
@@ -138,17 +123,13 @@ void ATerrainGenerator::UpdateTerrainMesh()
 		FVector SecondLastPoint = Spline->GetLocationAtSplinePoint(NumPoints - 2, ESplineCoordinateSpace::Local);
 
 		FVector Direction = LastPoint - SecondLastPoint;
-		UE_LOG(LogTemp, Warning, TEXT("Direction: %s"), *Direction.ToString());
 		float Distance = Direction.Size();
-		UE_LOG(LogTemp, Warning, TEXT("Distance: %f"), Distance);
 
 		// Normalize the direction vector
 		Direction.Normalize();
-		UE_LOG(LogTemp, Warning, TEXT("Direction: %s"), *Direction.ToString());
 		
 		// Add a new point at the same distance in the same direction
 		FVector NewPosition = LastPoint + Direction * Distance;
-		UE_LOG(LogTemp, Warning, TEXT("NumPoints: %d"), NumPoints);
 		// Add the new point to the spline
 		Spline->AddSplinePoint(NewPosition, ESplineCoordinateSpace::Local);
 
@@ -158,15 +139,9 @@ void ATerrainGenerator::UpdateTerrainMesh()
 		Spline->UpdateSpline();
 
 		int32 NumPoints2 = Spline->GetNumberOfSplinePoints();
-		UE_LOG(LogTemp, Warning, TEXT("NumPoints2: %d"), NumPoints2);
 
 		//FVector NewPosition = Spline->GetLocationAtSplinePoint((10000.0f / 50.0f) + 1, ESplineCoordinateSpace::Local); // Next spline point
 		float Deformation = GenerateNoise(NewPosition.X, NewPosition.Y);
-
-		UE_LOG(LogTemp, Warning, TEXT("NewPosition: %s"), *NewPosition.ToString());
-		UE_LOG(LogTemp, Warning, TEXT("Deformation: %f"), Deformation);
-		UE_LOG(LogTemp, Warning, TEXT("LastPoint: %s"), *LastPoint.ToString());
-		UE_LOG(LogTemp, Warning, TEXT("SecondLastPoint: %s"), *SecondLastPoint.ToString());
 
 		// add the new terrain plane
 		AddTerrainPlane(NumPoints2 - 1, NewPosition, FVector(1.0f, 1.0f, 1.0f), Deformation);
@@ -198,24 +173,20 @@ float ATerrainGenerator::GenerateNoise(float X, float Y)
 
 void ATerrainGenerator::AddTerrainPlane(int32 Index, FVector Position, FVector Scale, float Deformation)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Index: %d"), Index);
-	UE_LOG(LogTemp, Warning, TEXT("Position: %s"), *Position.ToString());
-	UE_LOG(LogTemp, Warning, TEXT("Def: %f"), Deformation);
-
 	float Distance = 0.0f;
 	// Make sure to calculate the distance between this point and the next spline point for correct scaling
+	FVector PrevSplinePoint = Spline->GetLocationAtSplinePoint(Index - 1, ESplineCoordinateSpace::Local);
 	FVector NextSplinePoint = Spline->GetLocationAtSplinePoint(Index + 1, ESplineCoordinateSpace::Local);
-	if (Index + 1 <= Spline->GetNumberOfSplinePoints()) // Ensure it's not the last point
+	if (Index < Spline->GetNumberOfSplinePoints()) // Ensure it's not the last point
 	{
 		// Calculate the distance to the next point
-		if (Index < 49)
+		if (Index != 0)
 		{
-			Distance = FVector::Dist(Position, NextSplinePoint);
+			Distance = FVector::Dist(Position, PrevSplinePoint);
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Last Point"));
-			Distance = 200.0f;
+			Distance = FVector::Dist(Position, NextSplinePoint);
 		}
 		// Create a new mesh component for the terrain plane
 		UStaticMeshComponent* NewPlane = NewObject<UStaticMeshComponent>(this);
@@ -227,21 +198,15 @@ void ATerrainGenerator::AddTerrainPlane(int32 Index, FVector Position, FVector S
 
 		// Set the scale of the terrain plane based on the distance between the points
 		NewPlane->SetRelativeScale3D(FVector(Distance / 100.0f, 1.0f, 1.0f)); // Adjust the X-scale based on the distance between points
-		UE_LOG(LogTemp, Warning, TEXT("Distance: %f"), Distance/100.0f);
 		// Apply noise-based deformation
-		NewPlane->SetRelativeLocation(Position + FVector(0.0f, 0.0f, Deformation)); // Apply deformation in Z-axis
+		//NewPlane->SetRelativeLocation(Position + FVector(0.0f, 0.0f, Deformation)); // Apply deformation in Z-axis
 
 		// Register the component
 		NewPlane->RegisterComponent();
 
-		// Log to verify plane creation
-		UE_LOG(LogTemp, Warning, TEXT("Added Terrain Plane at %s with Distance: %f"), *Position.ToString(), Distance);
-
 		// Store the new plane for later management
 		TerrainPlanes.Add(NewPlane);
-
-		//NewPlane->SetVisibility(true);
-		//NewPlane->SetHiddenInGame(false);
+		UE_LOG(LogTemp, Warning, TEXT("Plane Location: %s"), *Position.ToString());
 	}
 }
 
