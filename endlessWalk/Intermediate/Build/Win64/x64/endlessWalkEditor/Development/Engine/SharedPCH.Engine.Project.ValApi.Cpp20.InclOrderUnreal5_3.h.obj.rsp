@@ -1,4 +1,4 @@
-"C:\Users\senan\OneDrive\Documents\Masters in Computing in Computer Animation\finalProject\endlessWalk_PINE\endlessWalk\Intermediate\Build\Win64\x64\endlessWalkEditor\Development\Engine\SharedPCH.Engine.Project.ValApi.Cpp20.InclOrderUnreal5_3.cpp"
+"C:\Users\senan\OneDrive\Documents\Masters in Computing in Comp Anim\finalProject\projectFiles\endlessWalk\Intermediate\Build\Win64\x64\endlessWalkEditor\Development\Engine\SharedPCH.Engine.Project.ValApi.Cpp20.InclOrderUnreal5_3.cpp"
 /I "."
 /I "..\Intermediate\Build\Win64\UnrealEditor\Inc\Engine\UHT"
 /I "Runtime\Engine\Classes"
@@ -298,10 +298,10 @@
 /external:I "C:\Program Files (x86)\Windows Kits\10\include\10.0.22621.0\um"
 /external:I "C:\Program Files (x86)\Windows Kits\10\include\10.0.22621.0\winrt"
 /Yc"SharedPCH.Engine.Project.ValApi.Cpp20.InclOrderUnreal5_3.h"
-/Fp"C:\Users\senan\OneDrive\Documents\Masters in Computing in Computer Animation\finalProject\endlessWalk_PINE\endlessWalk\Intermediate\Build\Win64\x64\endlessWalkEditor\Development\Engine\SharedPCH.Engine.Project.ValApi.Cpp20.InclOrderUnreal5_3.h.pch"
-/Fo"C:\Users\senan\OneDrive\Documents\Masters in Computing in Computer Animation\finalProject\endlessWalk_PINE\endlessWalk\Intermediate\Build\Win64\x64\endlessWalkEditor\Development\Engine\SharedPCH.Engine.Project.ValApi.Cpp20.InclOrderUnreal5_3.h.obj"
-/experimental:log "C:\Users\senan\OneDrive\Documents\Masters in Computing in Computer Animation\finalProject\endlessWalk_PINE\endlessWalk\Intermediate\Build\Win64\x64\endlessWalkEditor\Development\Engine\SharedPCH.Engine.Project.ValApi.Cpp20.InclOrderUnreal5_3.h.sarif"
-/sourceDependencies "C:\Users\senan\OneDrive\Documents\Masters in Computing in Computer Animation\finalProject\endlessWalk_PINE\endlessWalk\Intermediate\Build\Win64\x64\endlessWalkEditor\Development\Engine\SharedPCH.Engine.Project.ValApi.Cpp20.InclOrderUnreal5_3.h.dep.json"
+/Fp"C:\Users\senan\OneDrive\Documents\Masters in Computing in Comp Anim\finalProject\projectFiles\endlessWalk\Intermediate\Build\Win64\x64\endlessWalkEditor\Development\Engine\SharedPCH.Engine.Project.ValApi.Cpp20.InclOrderUnreal5_3.h.pch"
+/Fo"C:\Users\senan\OneDrive\Documents\Masters in Computing in Comp Anim\finalProject\projectFiles\endlessWalk\Intermediate\Build\Win64\x64\endlessWalkEditor\Development\Engine\SharedPCH.Engine.Project.ValApi.Cpp20.InclOrderUnreal5_3.h.obj"
+/experimental:log "C:\Users\senan\OneDrive\Documents\Masters in Computing in Comp Anim\finalProject\projectFiles\endlessWalk\Intermediate\Build\Win64\x64\endlessWalkEditor\Development\Engine\SharedPCH.Engine.Project.ValApi.Cpp20.InclOrderUnreal5_3.h.sarif"
+/sourceDependencies "C:\Users\senan\OneDrive\Documents\Masters in Computing in Comp Anim\finalProject\projectFiles\endlessWalk\Intermediate\Build\Win64\x64\endlessWalkEditor\Development\Engine\SharedPCH.Engine.Project.ValApi.Cpp20.InclOrderUnreal5_3.h.dep.json"
 /d2ssa-cfg-question-
 /Zc:inline
 /nologo

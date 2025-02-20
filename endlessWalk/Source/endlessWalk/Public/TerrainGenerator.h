@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "ProceduralMeshComponent.h"
 #include "TerrainGenerator.generated.h"
 
 // Forward Declarations
@@ -43,7 +44,7 @@ public:
 
 	// Maximum length of the spline (10,000 units)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain")
-	float MaxSplineLength = 10000.0f;
+	int MaxSplineLength = 10000;
 
 	// Frequency of terrain noise
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Noise")
@@ -55,7 +56,13 @@ public:
 
 	// The distance at which to start adding new terrain planes
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain")
-	float PlaneDistance = 500.0f;
+	int PlaneDistance = 100;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain")
+	int CheckPoints = 2;
+
+	UPROPERTY(VisibleAnywhere)
+	UProceduralMeshComponent* TerrainMeshProc;
 
 private:
 	//Initialises the terrain mesh along the spline
@@ -68,6 +75,8 @@ private:
 
 	// Generates a Perlin noise value for a given position along the terrain
 	float GenerateNoise(float X, float Y);
+
+	void GenerateMeshFromSpline();
 
 	// Adds a new terrain plane at the correct position and deformation
 	void AddTerrainPlane(int32 Index, FVector Position, FVector Scale, float Deformation);

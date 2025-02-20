@@ -1,12 +1,12 @@
-"C:\Users\senan\OneDrive\Documents\Masters in Computing in Computer Animation\finalProject\endlessWalk_PINE\endlessWalk\Source\endlessWalk\endlessWalk.cpp"
-/FI"C:\Users\senan\OneDrive\Documents\Masters in Computing in Computer Animation\finalProject\endlessWalk_PINE\endlessWalk\Intermediate\Build\Win64\x64\endlessWalkEditor\Development\UnrealEd\SharedPCH.UnrealEd.Project.ValApi.Cpp20.InclOrderUnreal5_3.h"
-/FI"C:\Users\senan\OneDrive\Documents\Masters in Computing in Computer Animation\finalProject\endlessWalk_PINE\endlessWalk\Intermediate\Build\Win64\x64\UnrealEditor\Development\endlessWalk\Definitions.endlessWalk.h"
-/Yu"C:\Users\senan\OneDrive\Documents\Masters in Computing in Computer Animation\finalProject\endlessWalk_PINE\endlessWalk\Intermediate\Build\Win64\x64\endlessWalkEditor\Development\UnrealEd\SharedPCH.UnrealEd.Project.ValApi.Cpp20.InclOrderUnreal5_3.h"
-/Fp"C:\Users\senan\OneDrive\Documents\Masters in Computing in Computer Animation\finalProject\endlessWalk_PINE\endlessWalk\Intermediate\Build\Win64\x64\endlessWalkEditor\Development\UnrealEd\SharedPCH.UnrealEd.Project.ValApi.Cpp20.InclOrderUnreal5_3.h.pch"
-/Fo"C:\Users\senan\OneDrive\Documents\Masters in Computing in Computer Animation\finalProject\endlessWalk_PINE\endlessWalk\Intermediate\Build\Win64\x64\UnrealEditor\Development\endlessWalk\endlessWalk.cpp.obj"
-/experimental:log "C:\Users\senan\OneDrive\Documents\Masters in Computing in Computer Animation\finalProject\endlessWalk_PINE\endlessWalk\Intermediate\Build\Win64\x64\UnrealEditor\Development\endlessWalk\endlessWalk.cpp.sarif"
-/sourceDependencies "C:\Users\senan\OneDrive\Documents\Masters in Computing in Computer Animation\finalProject\endlessWalk_PINE\endlessWalk\Intermediate\Build\Win64\x64\UnrealEditor\Development\endlessWalk\endlessWalk.cpp.dep.json"
-@"C:\Users\senan\OneDrive\Documents\Masters in Computing in Computer Animation\finalProject\endlessWalk_PINE\endlessWalk\Intermediate\Build\Win64\x64\UnrealEditor\Development\endlessWalk\endlessWalk.Shared.rsp"
+"C:\Users\senan\OneDrive\Documents\Masters in Computing in Comp Anim\finalProject\projectFiles\endlessWalk\Source\endlessWalk\endlessWalk.cpp"
+/FI"C:\Users\senan\OneDrive\Documents\Masters in Computing in Comp Anim\finalProject\projectFiles\endlessWalk\Intermediate\Build\Win64\x64\endlessWalkEditor\Development\UnrealEd\SharedPCH.UnrealEd.Project.ValApi.Cpp20.InclOrderUnreal5_3.h"
+/FI"C:\Users\senan\OneDrive\Documents\Masters in Computing in Comp Anim\finalProject\projectFiles\endlessWalk\Intermediate\Build\Win64\x64\UnrealEditor\Development\endlessWalk\Definitions.endlessWalk.h"
+/Yu"C:\Users\senan\OneDrive\Documents\Masters in Computing in Comp Anim\finalProject\projectFiles\endlessWalk\Intermediate\Build\Win64\x64\endlessWalkEditor\Development\UnrealEd\SharedPCH.UnrealEd.Project.ValApi.Cpp20.InclOrderUnreal5_3.h"
+/Fp"C:\Users\senan\OneDrive\Documents\Masters in Computing in Comp Anim\finalProject\projectFiles\endlessWalk\Intermediate\Build\Win64\x64\endlessWalkEditor\Development\UnrealEd\SharedPCH.UnrealEd.Project.ValApi.Cpp20.InclOrderUnreal5_3.h.pch"
+/Fo"C:\Users\senan\OneDrive\Documents\Masters in Computing in Comp Anim\finalProject\projectFiles\endlessWalk\Intermediate\Build\Win64\x64\UnrealEditor\Development\endlessWalk\endlessWalk.cpp.obj"
+/experimental:log "C:\Users\senan\OneDrive\Documents\Masters in Computing in Comp Anim\finalProject\projectFiles\endlessWalk\Intermediate\Build\Win64\x64\UnrealEditor\Development\endlessWalk\endlessWalk.cpp.sarif"
+/sourceDependencies "C:\Users\senan\OneDrive\Documents\Masters in Computing in Comp Anim\finalProject\projectFiles\endlessWalk\Intermediate\Build\Win64\x64\UnrealEditor\Development\endlessWalk\endlessWalk.cpp.dep.json"
+@"C:\Users\senan\OneDrive\Documents\Masters in Computing in Comp Anim\finalProject\projectFiles\endlessWalk\Intermediate\Build\Win64\x64\UnrealEditor\Development\endlessWalk\endlessWalk.Shared.rsp"
 /d2ssa-cfg-question-
 /Zc:inline
 /nologo

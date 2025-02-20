@@ -1,7 +1,7 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\senan\\OneDrive\\Documents\\Masters in Computing in Computer Animation\\finalProject\\endlessWalk_PINE\\endlessWalk\\Intermediate\\Build\\BuildRulesProjects\\endlessWalkModuleRules\\endlessWalkModuleRules.csproj": {}
+    "C:\\Users\\senan\\OneDrive\\Documents\\Masters in Computing in Comp Anim\\finalProject\\projectFiles\\endlessWalk\\Intermediate\\Build\\BuildRulesProjects\\endlessWalkModuleRules\\endlessWalkModuleRules.csproj": {}
   },
   "projects": {
     "C:\\Program Files\\Epic Games\\UE_5.5\\Engine\\Intermediate\\Build\\BuildRulesProjects\\UE5ProgramRules\\UE5ProgramRules.csproj": {
@@ -1170,14 +1170,14 @@
         }
       }
     },
-    "C:\\Users\\senan\\OneDrive\\Documents\\Masters in Computing in Computer Animation\\finalProject\\endlessWalk_PINE\\endlessWalk\\Intermediate\\Build\\BuildRulesProjects\\endlessWalkModuleRules\\endlessWalkModuleRules.csproj": {
+    "C:\\Users\\senan\\OneDrive\\Documents\\Masters in Computing in Comp Anim\\finalProject\\projectFiles\\endlessWalk\\Intermediate\\Build\\BuildRulesProjects\\endlessWalkModuleRules\\endlessWalkModuleRules.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\senan\\OneDrive\\Documents\\Masters in Computing in Computer Animation\\finalProject\\endlessWalk_PINE\\endlessWalk\\Intermediate\\Build\\BuildRulesProjects\\endlessWalkModuleRules\\endlessWalkModuleRules.csproj",
+        "projectUniqueName": "C:\\Users\\senan\\OneDrive\\Documents\\Masters in Computing in Comp Anim\\finalProject\\projectFiles\\endlessWalk\\Intermediate\\Build\\BuildRulesProjects\\endlessWalkModuleRules\\endlessWalkModuleRules.csproj",
         "projectName": "endlessWalkModuleRules",
-        "projectPath": "C:\\Users\\senan\\OneDrive\\Documents\\Masters in Computing in Computer Animation\\finalProject\\endlessWalk_PINE\\endlessWalk\\Intermediate\\Build\\BuildRulesProjects\\endlessWalkModuleRules\\endlessWalkModuleRules.csproj",
+        "projectPath": "C:\\Users\\senan\\OneDrive\\Documents\\Masters in Computing in Comp Anim\\finalProject\\projectFiles\\endlessWalk\\Intermediate\\Build\\BuildRulesProjects\\endlessWalkModuleRules\\endlessWalkModuleRules.csproj",
         "packagesPath": "C:\\Users\\senan\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\senan\\OneDrive\\Documents\\Masters in Computing in Computer Animation\\finalProject\\endlessWalk_PINE\\endlessWalk\\Intermediate\\Build\\BuildRulesProjects\\endlessWalkModuleRules\\obj\\",
+        "outputPath": "C:\\Users\\senan\\OneDrive\\Documents\\Masters in Computing in Comp Anim\\finalProject\\projectFiles\\endlessWalk\\Intermediate\\Build\\BuildRulesProjects\\endlessWalkModuleRules\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
