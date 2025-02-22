@@ -41,7 +41,7 @@ void AuProcTerrainGenerator_CPP::BeginPlay()
 		Spline->UpdateSpline();
 	}
 	
-	InitialisePathMesh();
+	GeneratePathMesh();
 }
 
 // Called every frame
@@ -52,8 +52,11 @@ void AuProcTerrainGenerator_CPP::Tick(float DeltaTime)
 	UpdateTerrainSpline();
 }
 
-void AuProcTerrainGenerator_CPP::InitialisePathMesh()
+void AuProcTerrainGenerator_CPP::GeneratePathMesh()
 {
+	UVs.Empty();
+	float TotalDistance = 0.0f;
+
 	for (int32 i = 0; i < SplinePoints; i++)
 	{
 		FVector SplinePoint = Spline->GetLocationAtSplinePoint(i, ESplineCoordinateSpace::Local);
@@ -70,61 +73,45 @@ void AuProcTerrainGenerator_CPP::InitialisePathMesh()
 			Vertices.Add(LeftEdge);
 			Vertices.Add(RightEdge);
 		}
-		else if (i < SplinePoints - 1)
+		else
 		{
 			int var = i * 2;
-			Vertices[var] = Vertices[var + 2];
-			Vertices[var + 1] = Vertices[var + 3];
-			UE_LOG(LogTemp, Warning, TEXT("Vertices var and var+1: %s, %s"), *Vertices[var].ToString(), *Vertices[var + 1].ToString());
-		}
-		else if (i < SplinePoints)
-		{
-			Vertices[i*2] = LeftEdge;
-			Vertices[i*2 + 1] = RightEdge;
-			UE_LOG(LogTemp, Warning, TEXT("Vertices i*2 and i*2+1: %s, %s"), *Vertices[i * 2].ToString(), *Vertices[i * 2 + 1].ToString());
-		}
-
-		float SplineLength = CalculateSplineLength();
-		float Distance = (i / (float)SplinePoints - 1) * SplineLength;
-		float U = (Distance / SplineLength) * 20;
-		
-		if (UVs.Num() < SplinePoints * 2)
-		{
-			UVs.Add(FVector2D(U, 0.0f));
-			UVs.Add(FVector2D(U, 1.0f));
-		}
-		else if (i < SplinePoints - 1)
-		{
-			int var = i * 2;
-			UVs[var] = UVs[var + 2];
-			UVs[var + 1] = UVs[var + 3];
-			UE_LOG(LogTemp, Warning, TEXT("UVs var and var+1: %s, %s"), *UVs[var].ToString(), *UVs[var + 1].ToString());
-		}
-		else if (i < SplinePoints)
-		{
-			UVs[i*2] = FVector2D(U, 0.0f);
-			UVs[i*2 + 1] = FVector2D(U, 1.0f);
-		}
-
-		if (Triangles.Num() == (SplinePoints - 1) * 6)
-		{
-			Triangles.Empty();
-		}
-		else if (Triangles.Num() < ((SplinePoints - 1) * 6))
-		{
-			if (i > 0)
+			if (i < SplinePoints - 1)
 			{
-				int32 StartIndex = (i - 1) * 2;
-				Triangles.Add(StartIndex);
-				Triangles.Add(StartIndex + 1);
-				Triangles.Add(StartIndex + 3);
-				Triangles.Add(StartIndex);
-				Triangles.Add(StartIndex + 3);
-				Triangles.Add(StartIndex + 2);
+				Vertices[var] = Vertices[var + 2];
+				Vertices[var + 1] = Vertices[var + 3];
+			}
+			else
+			{
+				Vertices[var] = LeftEdge;
+				Vertices[var + 1] = RightEdge;
 			}
 		}
+		
+		float LeftU = LeftEdge.X / UVScale;
+		float LeftV = LeftEdge.Y / UVScale;
+		float RightU = RightEdge.X / UVScale;
+		float RightV = RightEdge.Y / UVScale;
 
-		UE_LOG(LogTemp, Warning, TEXT("Vertices: %d, Triangles: %d, UVs: %d"), Vertices.Num(), Triangles.Num(), UVs.Num());
+
+		if (UVs.Num() < SplinePoints * 2)
+		{
+			UVs.Add(FVector2D(LeftU, LeftV));
+			UVs.Add(FVector2D(RightU, RightV));
+		}
+	}
+
+	Triangles.Empty();
+	for (int i = 1; i < SplinePoints; i++)
+	{
+		int32 StartIndex = (i - 1) * 2;
+		Triangles.Add(StartIndex);
+		Triangles.Add(StartIndex + 1);
+		Triangles.Add(StartIndex + 3);
+		Triangles.Add(StartIndex);
+		Triangles.Add(StartIndex + 3);
+		Triangles.Add(StartIndex + 2);
+			
 	}
 
 	PathMesh->CreateMeshSection(0, Vertices, Triangles, TArray<FVector>(), UVs, TArray<FColor>(), TArray<FProcMeshTangent>(), true);
@@ -232,18 +219,6 @@ void AuProcTerrainGenerator_CPP::UpdateTerrainSpline()
 		UE_LOG(LogTemp, Warning, TEXT("Spline points: %d"), Spline->GetNumberOfSplinePoints());
 		UE_LOG(LogTemp, Warning, TEXT("New point: %s"), *NewPoint.ToString());
 
-		InitialisePathMesh();
+		GeneratePathMesh();
 	}
-}
-
-float AuProcTerrainGenerator_CPP::CalculateSplineLength()
-{
-	float TotalLength = 0.0f;
-	for (int32 i = 1; i <= SplinePoints; i++)
-	{
-		FVector PointA = Spline->GetLocationAtSplinePoint(i - 1, ESplineCoordinateSpace::Local);
-		FVector PointB = Spline->GetLocationAtSplinePoint(i, ESplineCoordinateSpace::Local);
-		TotalLength += FVector::Dist(PointA, PointB);
-	}
-	return TotalLength;
 }

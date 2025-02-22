@@ -1,0 +1,14 @@
+{
+    "Version": "1.2",
+    "Data": {
+        "Source": "c:\\users\\senan\\onedrive\\documents\\masters in computing in comp anim\\finalproject\\projectfiles\\endlesswalk\\source\\endlesswalk\\endlesswalk.cpp",
+        "ProvidedModule": "",
+        "PCH": "c:\\users\\senan\\onedrive\\documents\\masters in computing in comp anim\\finalproject\\projectfiles\\endlesswalk\\intermediate\\build\\win64\\x64\\endlesswalkeditor\\debuggame\\unrealed\\sharedpch.unrealed.project.nonoptimized.valapi.cpp20.inclorderunreal5_3.h.pch",
+        "Includes": [
+            "c:\\users\\senan\\onedrive\\documents\\masters in computing in comp anim\\finalproject\\projectfiles\\endlesswalk\\intermediate\\build\\win64\\x64\\unrealeditor\\debuggame\\endlesswalk\\definitions.endlesswalk.h",
+            "c:\\users\\senan\\onedrive\\documents\\masters in computing in comp anim\\finalproject\\projectfiles\\endlesswalk\\source\\endlesswalk\\endlesswalk.h"
+        ],
+        "ImportedModules": [],
+        "ImportedHeaderUnits": []
+    }
+}

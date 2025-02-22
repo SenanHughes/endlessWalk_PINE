@@ -51,7 +51,7 @@ public:
 	int PathWidth = 200;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain")
-	int UVScale = 20;
+	int UVScale = 1000;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
 	UMaterialInterface* AssignedMaterial;
@@ -59,6 +59,7 @@ public:
 	TArray<FVector> Vertices;
 	TArray<FVector2D> UVs;
 	TArray<int32> Triangles;
+	float DynamicSplineLength;
 
 protected:
 	// Called when the game starts or when spawned
@@ -69,11 +70,12 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ProceduralMesh")
-		UProceduralMeshComponent* PathMesh;
+	UProceduralMeshComponent* PathMesh;
+
+	bool initialiseUVs = false;
 	
-	void InitialisePathMesh();
+	void GeneratePathMesh();
 	void UpdateTerrainSpline();
-	float CalculateSplineLength();
 
 
 };
