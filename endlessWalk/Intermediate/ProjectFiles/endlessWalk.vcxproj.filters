@@ -48,6 +48,9 @@
     <ClCompile Include="..\..\Source\endlessWalk\Private\uProcMeshTest_CPP.cpp">
       <Filter>Source\endlessWalk\Private</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\endlessWalk\Private\uProcTerrainGenerator_CPP.cpp">
+      <Filter>Source\endlessWalk\Private</Filter>
+    </ClCompile>
     <Filter Include="Source\endlessWalk\Public">
       <UniqueIdentifier>{CCCE0563-1181-3237-98A9-FF7FC3A4F2E6}</UniqueIdentifier>
     </Filter>
@@ -55,6 +58,9 @@
       <Filter>Source\endlessWalk\Public</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\endlessWalk\Public\uProcMeshTest_CPP.h">
+      <Filter>Source\endlessWalk\Public</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\endlessWalk\Public\uProcTerrainGenerator_CPP.h">
       <Filter>Source\endlessWalk\Public</Filter>
     </ClCompile>
   </ItemGroup>
