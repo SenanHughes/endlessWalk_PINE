@@ -10,6 +10,7 @@
 
 // Forward Declarations
 class USplineComponent;
+class USplineComponent;
 
 UCLASS()
 class ENDLESSWALK_API AuProcTerrainGenerator_CPP : public AActor
@@ -22,7 +23,29 @@ public:
 
 	// The Spline to generate terrain along
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Terrain")
-	USplineComponent* Spline;
+	USplineComponent* PathSpline;
+
+	// The Spline to generate river along
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "River")
+	USplineComponent* RiverSpline;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
+	UMaterialInterface* PathMaterial;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
+	UMaterialInterface* RiverMaterial;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ProceduralMesh")
+	UProceduralMeshComponent* PathMesh;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ProceduralMesh")
+	UProceduralMeshComponent* RiverMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "River")
+	int RiverOffset = 200;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "River")
+	int RiverDepth = 100;
 
 	// Maximum length of the spline (10,000 units)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain")
@@ -47,16 +70,21 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain")
 	int CheckPoints = 2;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Terrain")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Terrain")
 	int PathWidth = 200;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Terrain")
+	int RiverWidth = 200;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain")
-	int UVScale = 1000;
+	int PathUVScale = 1000;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
-	UMaterialInterface* AssignedMaterial;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "River")
+	int RiverUVScale = 1000;
 
-	TArray<FVector> Vertices;
+	TArray<FVector> RiverSplinePoints;
+	TArray<FVector> PathVertices;
+	TArray<FVector> RiverVertices;
 	TArray<FVector2D> UVs;
 	TArray<int32> Triangles;
 	float DynamicSplineLength;
@@ -69,13 +97,10 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ProceduralMesh")
-	UProceduralMeshComponent* PathMesh;
 
-	bool initialiseUVs = false;
-	
+	void GenerateRiverMesh();
 	void GeneratePathMesh();
 	void UpdateTerrainSpline();
-
-
+	void CreateRiverSpline();
+	void UpdateRiverSpline();
 };
