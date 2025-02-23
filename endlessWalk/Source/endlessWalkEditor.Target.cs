@@ -9,7 +9,8 @@ public class endlessWalkEditorTarget : TargetRules
 	{
 		Type = TargetType.Editor;
 		DefaultBuildSettings = BuildSettingsVersion.V5;
+        IncludeOrderVersion = EngineIncludeOrderVersion.Latest;
 
-		ExtraModuleNames.AddRange( new string[] { "endlessWalk" } );
+        ExtraModuleNames.AddRange( new string[] { "endlessWalk" } );
 	}
 }
