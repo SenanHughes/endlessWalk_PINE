@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "uProcTerrainGenerator_CPP.h"
+#include "FastNoiseLite.h"
 
 // Sets default values
 AuProcTerrainGenerator_CPP::AuProcTerrainGenerator_CPP()
@@ -62,7 +62,11 @@ void AuProcTerrainGenerator_CPP::Tick(float DeltaTime)
 void AuProcTerrainGenerator_CPP::GeneratePathMesh()
 {
 	UVs.Empty();
-	float TotalDistance = 0.0f;
+
+	FastNoiseLite Noise;
+	Noise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
+	Noise.SetFrequency(NoiseFrequency);
+
 
 	for (int32 i = 0; i < SplinePoints; i++)
 	{
@@ -72,38 +76,91 @@ void AuProcTerrainGenerator_CPP::GeneratePathMesh()
 		FVector PathEdgeVector = FVector(-PathSplineTangent.Y, PathSplineTangent.X, 0.0f);
 
 		FVector PathLeftEdge = PathSplinePoint - PathEdgeVector * (PathWidth / 2);
+		FVector PathLeft3Quarter = PathSplinePoint - PathEdgeVector * ((PathWidth / 2) * 0.75f);
+		FVector PathLeft2Quarter = PathSplinePoint - PathEdgeVector * ((PathWidth / 2) * 0.5f);
+		FVector PathLeft1Quarter = PathSplinePoint - PathEdgeVector * ((PathWidth / 2) * 0.25f);
+		FVector PathRight1Quarter = PathSplinePoint + PathEdgeVector * ((PathWidth / 2) * 0.25f);
+		FVector PathRight2Quarter = PathSplinePoint + PathEdgeVector * ((PathWidth / 2) * 0.5f);
+		FVector PathRight3Quarter = PathSplinePoint + PathEdgeVector * ((PathWidth / 2) * 0.75f);
 		FVector PathRightEdge = PathSplinePoint + PathEdgeVector * (PathWidth / 2);
-
 		
-		if (PathVertices.Num() < SplinePoints * 2)
+		if (PathVertices.Num() < SplinePoints * 9)
 		{
 			PathVertices.Add(PathLeftEdge);
+			PathVertices.Add(PathLeft3Quarter);
+			PathVertices.Add(PathLeft2Quarter);
+			PathVertices.Add(PathLeft1Quarter);
+			PathVertices.Add(PathSplinePoint);
+			PathVertices.Add(PathRight1Quarter);
+			PathVertices.Add(PathRight2Quarter);
+			PathVertices.Add(PathRight3Quarter);
 			PathVertices.Add(PathRightEdge);
 		}
 		else
 		{
-			int var = i * 2;
+			int var = i * 9;
 			if (i < SplinePoints - 1)
 			{
-				PathVertices[var] = PathVertices[var + 2];
-				PathVertices[var + 1] = PathVertices[var + 3];
+				PathVertices[var] = PathVertices[var + 9];
+				PathVertices[var + 1] = PathVertices[var + 10];
+				PathVertices[var + 2] = PathVertices[var + 11];
+				PathVertices[var + 3] = PathVertices[var + 12];
+				PathVertices[var + 4] = PathVertices[var + 13];
+				PathVertices[var + 5] = PathVertices[var + 14];
+				PathVertices[var + 6] = PathVertices[var + 15];
+				PathVertices[var + 7] = PathVertices[var + 16];
+				PathVertices[var + 8] = PathVertices[var + 17];
 			}
 			else
 			{
 				PathVertices[var] = PathLeftEdge;
-				PathVertices[var + 1] = PathRightEdge;
+				PathVertices[var + 1] = PathLeft3Quarter;
+				PathVertices[var + 2] = PathLeft2Quarter;
+				PathVertices[var + 3] = PathLeft1Quarter;
+				PathVertices[var + 4] = PathSplinePoint;
+				PathVertices[var + 5] = PathRight1Quarter;
+				PathVertices[var + 6] = PathRight2Quarter;
+				PathVertices[var + 7] = PathRight3Quarter;
+				PathVertices[var + 8] = PathRightEdge;
 			}
+		}
+
+		for (int32 x = i * 9; x < (i * 9) + 9; x++)
+		{
+			float NoiseValue = Noise.GetNoise(PathVertices[x].X, PathVertices[x].Y);
+			PathVertices[x].Z = NoiseValue * NoiseAmplitude;
 		}
 		
 		float PathLeftU = PathLeftEdge.X / PathUVScale;
 		float PathLeftV = PathLeftEdge.Y / PathUVScale;
+		float PathLeft3QU = PathLeft3Quarter.X / PathUVScale;
+		float PathLeft3QV = PathLeft3Quarter.Y / PathUVScale;
+		float PathLeft2QU = PathLeft2Quarter.X / PathUVScale;
+		float PathLeft2QV = PathLeft2Quarter.Y / PathUVScale;
+		float PathLeft1QU = PathLeft1Quarter.X / PathUVScale;
+		float PathLeft1QV = PathLeft1Quarter.Y / PathUVScale;
+		float PathCenterU = PathSplinePoint.X / PathUVScale;
+		float PathCenterV = PathSplinePoint.Y / PathUVScale;
+		float PathRight1QU = PathRight1Quarter.X / PathUVScale;
+		float PathRight1QV = PathRight1Quarter.Y / PathUVScale;
+		float PathRight2QU = PathRight2Quarter.X / PathUVScale;
+		float PathRight2QV = PathRight2Quarter.Y / PathUVScale;
+		float PathRight3QU = PathRight3Quarter.X / PathUVScale;
+		float PathRight3QV = PathRight3Quarter.Y / PathUVScale;
 		float PathRightU = PathRightEdge.X / PathUVScale;
 		float PathRightV = PathRightEdge.Y / PathUVScale;
 
 
-		if (UVs.Num() < SplinePoints * 2)
+		if (UVs.Num() < SplinePoints * 9)
 		{
 			UVs.Add(FVector2D(PathLeftU, PathLeftV));
+			UVs.Add(FVector2D(PathLeft3QU, PathLeft3QV));
+			UVs.Add(FVector2D(PathLeft2QU, PathLeft2QV));
+			UVs.Add(FVector2D(PathLeft1QU, PathLeft1QV));
+			UVs.Add(FVector2D(PathCenterU, PathCenterV));
+			UVs.Add(FVector2D(PathRight1QU, PathRight1QV));
+			UVs.Add(FVector2D(PathRight2QU, PathRight2QV));
+			UVs.Add(FVector2D(PathRight3QU, PathRight3QV));
 			UVs.Add(FVector2D(PathRightU, PathRightV));
 		}
 	}
@@ -111,13 +168,62 @@ void AuProcTerrainGenerator_CPP::GeneratePathMesh()
 	Triangles.Empty();
 	for (int i = 1; i < SplinePoints; i++)
 	{
-		int32 StartIndex = (i - 1) * 2;
+		int32 StartIndex = (i - 1) * 9;
 		Triangles.Add(StartIndex);
 		Triangles.Add(StartIndex + 1);
-		Triangles.Add(StartIndex + 3);
+		Triangles.Add(StartIndex + 10);
 		Triangles.Add(StartIndex);
-		Triangles.Add(StartIndex + 3);
+		Triangles.Add(StartIndex + 10);
+		Triangles.Add(StartIndex + 9);
+
+		Triangles.Add(StartIndex + 1);
 		Triangles.Add(StartIndex + 2);
+		Triangles.Add(StartIndex + 11);
+		Triangles.Add(StartIndex + 1);
+		Triangles.Add(StartIndex + 11);
+		Triangles.Add(StartIndex + 10);
+
+		Triangles.Add(StartIndex + 2);
+		Triangles.Add(StartIndex + 3);
+		Triangles.Add(StartIndex + 12);
+		Triangles.Add(StartIndex + 2);
+		Triangles.Add(StartIndex + 12);
+		Triangles.Add(StartIndex + 11);
+
+		Triangles.Add(StartIndex + 3);
+		Triangles.Add(StartIndex + 4);
+		Triangles.Add(StartIndex + 13);
+		Triangles.Add(StartIndex + 3);
+		Triangles.Add(StartIndex + 13);
+		Triangles.Add(StartIndex + 12);
+
+		Triangles.Add(StartIndex + 4);
+		Triangles.Add(StartIndex + 5);
+		Triangles.Add(StartIndex + 14);
+		Triangles.Add(StartIndex + 4);
+		Triangles.Add(StartIndex + 14);
+		Triangles.Add(StartIndex + 13);
+
+		Triangles.Add(StartIndex + 5);
+		Triangles.Add(StartIndex + 6);
+		Triangles.Add(StartIndex + 15);
+		Triangles.Add(StartIndex + 5);
+		Triangles.Add(StartIndex + 15);
+		Triangles.Add(StartIndex + 14);
+
+		Triangles.Add(StartIndex + 6);
+		Triangles.Add(StartIndex + 7);
+		Triangles.Add(StartIndex + 16);
+		Triangles.Add(StartIndex + 6);
+		Triangles.Add(StartIndex + 16);
+		Triangles.Add(StartIndex + 15);
+
+		Triangles.Add(StartIndex + 7);
+		Triangles.Add(StartIndex + 8);
+		Triangles.Add(StartIndex + 17);
+		Triangles.Add(StartIndex + 7);
+		Triangles.Add(StartIndex + 17);
+		Triangles.Add(StartIndex + 16);
 			
 	}
 
@@ -135,7 +241,6 @@ void AuProcTerrainGenerator_CPP::GeneratePathMesh()
 void AuProcTerrainGenerator_CPP::GenerateRiverMesh()
 {
 	UVs.Empty();
-	float TotalDistance = 0.0f;
 
 	for (int32 i = 0; i < SplinePoints; i++)
 	{
@@ -145,38 +250,86 @@ void AuProcTerrainGenerator_CPP::GenerateRiverMesh()
 		FVector RiverEdgeVector = FVector(-RiverSplineTangent.Y, RiverSplineTangent.X, 0.0f);
 
 		FVector RiverLeftEdge = RiverSplinePoint - RiverEdgeVector * (RiverWidth/2);
+		FVector RiverLeft3Quarter = RiverSplinePoint - RiverEdgeVector * ((RiverWidth / 2) * 0.75f);
+		FVector RiverLeft2Quarter = RiverSplinePoint - RiverEdgeVector * ((RiverWidth / 2) * 0.5f);
+		FVector RiverLeft1Quarter = RiverSplinePoint - RiverEdgeVector * ((RiverWidth / 2) * 0.25f);
+		FVector RiverRight1Quarter = RiverSplinePoint + RiverEdgeVector * ((RiverWidth / 2) * 0.25f);
+		FVector RiverRight2Quarter = RiverSplinePoint + RiverEdgeVector * ((RiverWidth / 2) * 0.5f);
+		FVector RiverRight3Quarter = RiverSplinePoint + RiverEdgeVector * ((RiverWidth / 2) * 0.75f);
 		FVector RiverRightEdge = RiverSplinePoint + RiverEdgeVector * (RiverWidth/2);
 
 
-		if (RiverVertices.Num() < SplinePoints * 2)
+		if (RiverVertices.Num() < SplinePoints * 9)
 		{
 			RiverVertices.Add(RiverLeftEdge);
+			RiverVertices.Add(RiverLeft3Quarter);
+			RiverVertices.Add(RiverLeft2Quarter);
+			RiverVertices.Add(RiverLeft1Quarter);
+			RiverVertices.Add(RiverSplinePoint);
+			RiverVertices.Add(RiverRight1Quarter);
+			RiverVertices.Add(RiverRight2Quarter);
+			RiverVertices.Add(RiverRight3Quarter);
 			RiverVertices.Add(RiverRightEdge);
 		}
 		else
 		{
-			int var = i * 2;
+			int var = i * 9;
 			if (i < SplinePoints - 1)
 			{
-				RiverVertices[var] = RiverVertices[var + 2];
-				RiverVertices[var + 1] = RiverVertices[var + 3];
+				RiverVertices[var] = RiverVertices[var + 9];
+				RiverVertices[var + 1] = RiverVertices[var + 10];
+				RiverVertices[var + 2] = RiverVertices[var + 11];
+				RiverVertices[var + 3] = RiverVertices[var + 12];
+				RiverVertices[var + 4] = RiverVertices[var + 13];
+				RiverVertices[var + 5] = RiverVertices[var + 14];
+				RiverVertices[var + 6] = RiverVertices[var + 15];
+				RiverVertices[var + 7] = RiverVertices[var + 16];
+				RiverVertices[var + 8] = RiverVertices[var + 17];
 			}
 			else
 			{
 				RiverVertices[var] = RiverLeftEdge;
-				RiverVertices[var + 1] = RiverRightEdge;
+				RiverVertices[var + 1] = RiverLeft3Quarter;
+				RiverVertices[var + 2] = RiverLeft2Quarter;
+				RiverVertices[var + 3] = RiverLeft1Quarter;
+				RiverVertices[var + 4] = RiverSplinePoint;
+				RiverVertices[var + 5] = RiverRight1Quarter;
+				RiverVertices[var + 6] = RiverRight2Quarter;
+				RiverVertices[var + 7] = RiverRight3Quarter;
+				RiverVertices[var + 8] = RiverRightEdge;
 			}
 		}
 
 		float RiverLeftU = RiverLeftEdge.X / RiverUVScale;
 		float RiverLeftV = RiverLeftEdge.Y / RiverUVScale;
+		float RiverLeft3QU = RiverLeft3Quarter.X / RiverUVScale;
+		float RiverLeft3QV = RiverLeft3Quarter.Y / RiverUVScale;
+		float RiverLeft2QU = RiverLeft2Quarter.X / RiverUVScale;
+		float RiverLeft2QV = RiverLeft2Quarter.Y / RiverUVScale;
+		float RiverLeft1QU = RiverLeft1Quarter.X / RiverUVScale;
+		float RiverLeft1QV = RiverLeft1Quarter.Y / RiverUVScale;
+		float RiverCenterU = RiverSplinePoint.X / RiverUVScale;
+		float RiverCenterV = RiverSplinePoint.Y / RiverUVScale;
+		float RiverRight1QU = RiverRight1Quarter.X / RiverUVScale;
+		float RiverRight1QV = RiverRight1Quarter.Y / RiverUVScale;
+		float RiverRight2QU = RiverRight2Quarter.X / RiverUVScale;
+		float RiverRight2QV = RiverRight2Quarter.Y / RiverUVScale;
+		float RiverRight3QU = RiverRight3Quarter.X / RiverUVScale;
+		float RiverRight3QV = RiverRight3Quarter.Y / RiverUVScale;
 		float RiverRightU = RiverRightEdge.X / RiverUVScale;
 		float RiverRightV = RiverRightEdge.Y / RiverUVScale;
 
 
-		if (UVs.Num() < SplinePoints * 2)
+		if (UVs.Num() < SplinePoints * 9)
 		{
 			UVs.Add(FVector2D(RiverLeftU, RiverLeftV));
+			UVs.Add(FVector2D(RiverLeft3QU, RiverLeft3QV));
+			UVs.Add(FVector2D(RiverLeft2QU, RiverLeft2QV));
+			UVs.Add(FVector2D(RiverLeft1QU, RiverLeft1QV));
+			UVs.Add(FVector2D(RiverCenterU, RiverCenterV));
+			UVs.Add(FVector2D(RiverRight1QU, RiverRight1QV));
+			UVs.Add(FVector2D(RiverRight2QU, RiverRight2QV));
+			UVs.Add(FVector2D(RiverRight3QU, RiverRight3QV));
 			UVs.Add(FVector2D(RiverRightU, RiverRightV));
 		}
 	}
@@ -184,14 +337,62 @@ void AuProcTerrainGenerator_CPP::GenerateRiverMesh()
 	Triangles.Empty();
 	for (int i = 1; i < SplinePoints; i++)
 	{
-		int32 StartIndex = (i - 1) * 2;
+		int32 StartIndex = (i - 1) * 9;
 		Triangles.Add(StartIndex);
 		Triangles.Add(StartIndex + 1);
-		Triangles.Add(StartIndex + 3);
+		Triangles.Add(StartIndex + 10);
 		Triangles.Add(StartIndex);
-		Triangles.Add(StartIndex + 3);
-		Triangles.Add(StartIndex + 2);
+		Triangles.Add(StartIndex + 10);
+		Triangles.Add(StartIndex + 9);
 
+		Triangles.Add(StartIndex + 1);
+		Triangles.Add(StartIndex + 2);
+		Triangles.Add(StartIndex + 11);
+		Triangles.Add(StartIndex + 1);
+		Triangles.Add(StartIndex + 11);
+		Triangles.Add(StartIndex + 10);
+
+		Triangles.Add(StartIndex + 2);
+		Triangles.Add(StartIndex + 3);
+		Triangles.Add(StartIndex + 12);
+		Triangles.Add(StartIndex + 2);
+		Triangles.Add(StartIndex + 12);
+		Triangles.Add(StartIndex + 11);
+
+		Triangles.Add(StartIndex + 3);
+		Triangles.Add(StartIndex + 4);
+		Triangles.Add(StartIndex + 13);
+		Triangles.Add(StartIndex + 3);
+		Triangles.Add(StartIndex + 13);
+		Triangles.Add(StartIndex + 12);
+
+		Triangles.Add(StartIndex + 4);
+		Triangles.Add(StartIndex + 5);
+		Triangles.Add(StartIndex + 14);
+		Triangles.Add(StartIndex + 4);
+		Triangles.Add(StartIndex + 14);
+		Triangles.Add(StartIndex + 13);
+
+		Triangles.Add(StartIndex + 5);
+		Triangles.Add(StartIndex + 6);
+		Triangles.Add(StartIndex + 15);
+		Triangles.Add(StartIndex + 5);
+		Triangles.Add(StartIndex + 15);
+		Triangles.Add(StartIndex + 14);
+
+		Triangles.Add(StartIndex + 6);
+		Triangles.Add(StartIndex + 7);
+		Triangles.Add(StartIndex + 16);
+		Triangles.Add(StartIndex + 6);
+		Triangles.Add(StartIndex + 16);
+		Triangles.Add(StartIndex + 15);
+
+		Triangles.Add(StartIndex + 7);
+		Triangles.Add(StartIndex + 8);
+		Triangles.Add(StartIndex + 17);
+		Triangles.Add(StartIndex + 7);
+		Triangles.Add(StartIndex + 17);
+		Triangles.Add(StartIndex + 16);
 	}
 
 	RiverMesh->CreateMeshSection(0, RiverVertices, Triangles, TArray<FVector>(), UVs, TArray<FColor>(), TArray<FProcMeshTangent>(), true);
@@ -215,7 +416,7 @@ void AuProcTerrainGenerator_CPP::UpdateTerrainSpline()
 	FVector CharacterLocation = GetWorld()->GetFirstPlayerController()->GetPawn()->GetActorLocation();
 	FVector MidPoint = PathSpline->GetLocationAtSplinePoint(SplinePoints / 2, ESplineCoordinateSpace::Local);
 
-	if (FVector(CharacterLocation - MidPoint).Size2D() <= PathWidth/2)
+	if (FVector(CharacterLocation - MidPoint).Size2D() <= PathWidth / 2)
 	{
 		FVector LastPoint = PathSpline->GetLocationAtSplinePoint(SplinePoints - 1, ESplineCoordinateSpace::Local);
 		FVector SecondLastPoint = PathSpline->GetLocationAtSplinePoint(SplinePoints - 2, ESplineCoordinateSpace::Local);

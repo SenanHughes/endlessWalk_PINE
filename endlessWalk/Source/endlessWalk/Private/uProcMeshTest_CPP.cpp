@@ -62,9 +62,18 @@ void AuProcMeshTest_CPP::GenerateSquareMesh()
 		FVector EdgeVector = FVector(-SplineTangent.Y, SplineTangent.X, 0.0f);
 
 		FVector LeftEdge = SplinePoint - EdgeVector * 200;
+		FVector Left2Third = SplinePoint - EdgeVector * (200*0.66666f);
+		FVector Left1Third = SplinePoint - EdgeVector * (200 * 0.33333f);
 		FVector RightEdge = SplinePoint + EdgeVector * 200;
+		FVector Right2Third = SplinePoint + EdgeVector * (200*0.66666f);
+		FVector Right1Third = SplinePoint + EdgeVector * (200 * 0.33333f);
 
 		Vertices.Add(LeftEdge);
+		Vertices.Add(Left2Third);
+		Vertices.Add(Left1Third);
+		Vertices.Add(SplinePoint);
+		Vertices.Add(Right1Third);
+		Vertices.Add(Right2Third);
 		Vertices.Add(RightEdge);
 
 		float U = (float)i / (float)Spline->GetNumberOfSplinePoints();
@@ -73,13 +82,48 @@ void AuProcMeshTest_CPP::GenerateSquareMesh()
 
 		if (i > 0)
 		{
-			int32 StartIndex = (i - 1) * 2;
+			int32 StartIndex = (i - 1) * 7;
 			Triangles.Add(StartIndex);
 			Triangles.Add(StartIndex + 1);
-			Triangles.Add(StartIndex + 3);
+			Triangles.Add(StartIndex + 8);
 			Triangles.Add(StartIndex);
-			Triangles.Add(StartIndex + 3);
+			Triangles.Add(StartIndex + 8);
+			Triangles.Add(StartIndex + 7);
+
+			Triangles.Add(StartIndex + 1);
 			Triangles.Add(StartIndex + 2);
+			Triangles.Add(StartIndex + 9);
+			Triangles.Add(StartIndex + 1);
+			Triangles.Add(StartIndex + 9);
+			Triangles.Add(StartIndex + 8);
+
+			Triangles.Add(StartIndex + 2);
+			Triangles.Add(StartIndex + 3);
+			Triangles.Add(StartIndex + 10);
+			Triangles.Add(StartIndex + 2);
+			Triangles.Add(StartIndex + 10);
+			Triangles.Add(StartIndex + 9);
+
+			Triangles.Add(StartIndex + 3);
+			Triangles.Add(StartIndex + 4);
+			Triangles.Add(StartIndex + 11);
+			Triangles.Add(StartIndex + 3);
+			Triangles.Add(StartIndex + 11);
+			Triangles.Add(StartIndex + 10);
+
+			Triangles.Add(StartIndex + 4);
+			Triangles.Add(StartIndex + 5);
+			Triangles.Add(StartIndex + 12);
+			Triangles.Add(StartIndex + 4);
+			Triangles.Add(StartIndex + 12);
+			Triangles.Add(StartIndex + 11);
+
+			Triangles.Add(StartIndex + 5);
+			Triangles.Add(StartIndex + 6);
+			Triangles.Add(StartIndex + 13);
+			Triangles.Add(StartIndex + 5);
+			Triangles.Add(StartIndex + 13);
+			Triangles.Add(StartIndex + 12);
 		}
 	}
 
