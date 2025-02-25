@@ -61,7 +61,9 @@ void AuProcTerrainGenerator_CPP::Tick(float DeltaTime)
 
 void AuProcTerrainGenerator_CPP::GeneratePathMesh()
 {
-	UVs.Empty();
+	FVector PathVert;
+	float NoiseValue;
+	//PathUVs.Empty();
 
 	FastNoiseLite Noise;
 	Noise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
@@ -76,158 +78,67 @@ void AuProcTerrainGenerator_CPP::GeneratePathMesh()
 		FVector PathEdgeVector = FVector(-PathSplineTangent.Y, PathSplineTangent.X, 0.0f);
 
 		FVector PathLeftEdge = PathSplinePoint - PathEdgeVector * (PathWidth / 2);
-		FVector PathLeft3Quarter = PathSplinePoint - PathEdgeVector * ((PathWidth / 2) * 0.75f);
-		FVector PathLeft2Quarter = PathSplinePoint - PathEdgeVector * ((PathWidth / 2) * 0.5f);
-		FVector PathLeft1Quarter = PathSplinePoint - PathEdgeVector * ((PathWidth / 2) * 0.25f);
-		FVector PathRight1Quarter = PathSplinePoint + PathEdgeVector * ((PathWidth / 2) * 0.25f);
-		FVector PathRight2Quarter = PathSplinePoint + PathEdgeVector * ((PathWidth / 2) * 0.5f);
-		FVector PathRight3Quarter = PathSplinePoint + PathEdgeVector * ((PathWidth / 2) * 0.75f);
-		FVector PathRightEdge = PathSplinePoint + PathEdgeVector * (PathWidth / 2);
-		
-		if (PathVertices.Num() < SplinePoints * 9)
+		//FVector PathRightEdge = PathSplinePoint + PathEdgeVector * (PathWidth / 2);
+
+		for (int32 y = 0; y < VertCount; y++)
 		{
-			PathVertices.Add(PathLeftEdge);
-			PathVertices.Add(PathLeft3Quarter);
-			PathVertices.Add(PathLeft2Quarter);
-			PathVertices.Add(PathLeft1Quarter);
-			PathVertices.Add(PathSplinePoint);
-			PathVertices.Add(PathRight1Quarter);
-			PathVertices.Add(PathRight2Quarter);
-			PathVertices.Add(PathRight3Quarter);
-			PathVertices.Add(PathRightEdge);
-		}
-		else
-		{
-			int var = i * 9;
-			if (i < SplinePoints - 1)
+			if (PathVertices.Num() < SplinePoints * VertCount)
 			{
-				PathVertices[var] = PathVertices[var + 9];
-				PathVertices[var + 1] = PathVertices[var + 10];
-				PathVertices[var + 2] = PathVertices[var + 11];
-				PathVertices[var + 3] = PathVertices[var + 12];
-				PathVertices[var + 4] = PathVertices[var + 13];
-				PathVertices[var + 5] = PathVertices[var + 14];
-				PathVertices[var + 6] = PathVertices[var + 15];
-				PathVertices[var + 7] = PathVertices[var + 16];
-				PathVertices[var + 8] = PathVertices[var + 17];
+				// Vertice Position & Noise
+				float offsetCalc = ((PathWidth / 2.0f) * (y / ((VertCount - 1.0f) / 2.0f)));
+				PathVert = PathLeftEdge + (PathEdgeVector * offsetCalc);
+				NoiseValue = Noise.GetNoise(PathVert.X, PathVert.Y);
+				PathVert.Z = NoiseValue * NoiseAmplitude;
+				PathVertices.Add(PathVert);
+
+				// PathUVs
+				float PathVertU = PathVert.X / PathUVScale;
+				float PathVertV = PathVert.Y / PathUVScale;
+				PathUVs.Add(FVector2D(PathVertU, PathVertV));
 			}
 			else
 			{
-				PathVertices[var] = PathLeftEdge;
-				PathVertices[var + 1] = PathLeft3Quarter;
-				PathVertices[var + 2] = PathLeft2Quarter;
-				PathVertices[var + 3] = PathLeft1Quarter;
-				PathVertices[var + 4] = PathSplinePoint;
-				PathVertices[var + 5] = PathRight1Quarter;
-				PathVertices[var + 6] = PathRight2Quarter;
-				PathVertices[var + 7] = PathRight3Quarter;
-				PathVertices[var + 8] = PathRightEdge;
+				int var = i * VertCount;
+				if (i < SplinePoints - 1)
+				{
+					PathVertices[var + y] = PathVertices[var + y + (VertCount)];
+				}
+				else
+				{
+					float offsetCalc = ((PathWidth / 2.0f) * (y / ((VertCount - 1.0f) / 2.0f)));
+					PathVert = PathLeftEdge + (PathEdgeVector * offsetCalc);
+					NoiseValue = Noise.GetNoise(PathVert.X, PathVert.Y);
+					PathVert.Z = NoiseValue * NoiseAmplitude;
+					PathVertices[var + y] = PathVert;
+
+					//UVs
+					float PathVertU = PathVert.X / PathUVScale;
+					float PathVertV = PathVert.Y / PathUVScale;
+					PathUVs.Add(FVector2D(PathVertU, PathVertV));
+				}
 			}
-		}
-
-		for (int32 x = i * 9; x < (i * 9) + 9; x++)
-		{
-			float NoiseValue = Noise.GetNoise(PathVertices[x].X, PathVertices[x].Y);
-			PathVertices[x].Z = NoiseValue * NoiseAmplitude;
-		}
-		
-		float PathLeftU = PathLeftEdge.X / PathUVScale;
-		float PathLeftV = PathLeftEdge.Y / PathUVScale;
-		float PathLeft3QU = PathLeft3Quarter.X / PathUVScale;
-		float PathLeft3QV = PathLeft3Quarter.Y / PathUVScale;
-		float PathLeft2QU = PathLeft2Quarter.X / PathUVScale;
-		float PathLeft2QV = PathLeft2Quarter.Y / PathUVScale;
-		float PathLeft1QU = PathLeft1Quarter.X / PathUVScale;
-		float PathLeft1QV = PathLeft1Quarter.Y / PathUVScale;
-		float PathCenterU = PathSplinePoint.X / PathUVScale;
-		float PathCenterV = PathSplinePoint.Y / PathUVScale;
-		float PathRight1QU = PathRight1Quarter.X / PathUVScale;
-		float PathRight1QV = PathRight1Quarter.Y / PathUVScale;
-		float PathRight2QU = PathRight2Quarter.X / PathUVScale;
-		float PathRight2QV = PathRight2Quarter.Y / PathUVScale;
-		float PathRight3QU = PathRight3Quarter.X / PathUVScale;
-		float PathRight3QV = PathRight3Quarter.Y / PathUVScale;
-		float PathRightU = PathRightEdge.X / PathUVScale;
-		float PathRightV = PathRightEdge.Y / PathUVScale;
-
-
-		if (UVs.Num() < SplinePoints * 9)
-		{
-			UVs.Add(FVector2D(PathLeftU, PathLeftV));
-			UVs.Add(FVector2D(PathLeft3QU, PathLeft3QV));
-			UVs.Add(FVector2D(PathLeft2QU, PathLeft2QV));
-			UVs.Add(FVector2D(PathLeft1QU, PathLeft1QV));
-			UVs.Add(FVector2D(PathCenterU, PathCenterV));
-			UVs.Add(FVector2D(PathRight1QU, PathRight1QV));
-			UVs.Add(FVector2D(PathRight2QU, PathRight2QV));
-			UVs.Add(FVector2D(PathRight3QU, PathRight3QV));
-			UVs.Add(FVector2D(PathRightU, PathRightV));
 		}
 	}
 
 	Triangles.Empty();
-	for (int i = 1; i < SplinePoints; i++)
+	if (PathTriangles.Num() < (((SplinePoints - 1) * (VertCount-1)) * 6))
 	{
-		int32 StartIndex = (i - 1) * 9;
-		Triangles.Add(StartIndex);
-		Triangles.Add(StartIndex + 1);
-		Triangles.Add(StartIndex + 10);
-		Triangles.Add(StartIndex);
-		Triangles.Add(StartIndex + 10);
-		Triangles.Add(StartIndex + 9);
-
-		Triangles.Add(StartIndex + 1);
-		Triangles.Add(StartIndex + 2);
-		Triangles.Add(StartIndex + 11);
-		Triangles.Add(StartIndex + 1);
-		Triangles.Add(StartIndex + 11);
-		Triangles.Add(StartIndex + 10);
-
-		Triangles.Add(StartIndex + 2);
-		Triangles.Add(StartIndex + 3);
-		Triangles.Add(StartIndex + 12);
-		Triangles.Add(StartIndex + 2);
-		Triangles.Add(StartIndex + 12);
-		Triangles.Add(StartIndex + 11);
-
-		Triangles.Add(StartIndex + 3);
-		Triangles.Add(StartIndex + 4);
-		Triangles.Add(StartIndex + 13);
-		Triangles.Add(StartIndex + 3);
-		Triangles.Add(StartIndex + 13);
-		Triangles.Add(StartIndex + 12);
-
-		Triangles.Add(StartIndex + 4);
-		Triangles.Add(StartIndex + 5);
-		Triangles.Add(StartIndex + 14);
-		Triangles.Add(StartIndex + 4);
-		Triangles.Add(StartIndex + 14);
-		Triangles.Add(StartIndex + 13);
-
-		Triangles.Add(StartIndex + 5);
-		Triangles.Add(StartIndex + 6);
-		Triangles.Add(StartIndex + 15);
-		Triangles.Add(StartIndex + 5);
-		Triangles.Add(StartIndex + 15);
-		Triangles.Add(StartIndex + 14);
-
-		Triangles.Add(StartIndex + 6);
-		Triangles.Add(StartIndex + 7);
-		Triangles.Add(StartIndex + 16);
-		Triangles.Add(StartIndex + 6);
-		Triangles.Add(StartIndex + 16);
-		Triangles.Add(StartIndex + 15);
-
-		Triangles.Add(StartIndex + 7);
-		Triangles.Add(StartIndex + 8);
-		Triangles.Add(StartIndex + 17);
-		Triangles.Add(StartIndex + 7);
-		Triangles.Add(StartIndex + 17);
-		Triangles.Add(StartIndex + 16);
-			
+		for (int i = 1; i < SplinePoints; i++)
+		{
+			for (int32 y = 0; y < VertCount - 1; y++)
+			{
+				int var = (i - 1) * VertCount;
+				PathTriangles.Add(var + y);
+				PathTriangles.Add(var + y + 1);
+				PathTriangles.Add(var + y + VertCount + 1);
+				PathTriangles.Add(var + y);
+				PathTriangles.Add(var + y + VertCount + 1);
+				PathTriangles.Add(var + y + VertCount);
+			}
+		}
 	}
 
-	PathMesh->CreateMeshSection(0, PathVertices, Triangles, TArray<FVector>(), UVs, TArray<FColor>(), TArray<FProcMeshTangent>(), true);
+	PathMesh->CreateMeshSection(0, PathVertices, PathTriangles, TArray<FVector>(), PathUVs, TArray<FColor>(), TArray<FProcMeshTangent>(), true);
 	
 	PathMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 
@@ -394,7 +305,7 @@ void AuProcTerrainGenerator_CPP::GenerateRiverMesh()
 		Triangles.Add(StartIndex + 17);
 		Triangles.Add(StartIndex + 16);
 	}
-
+	UE_LOG(LogTemp, Warning, TEXT("Triangle Count: %d, Vertice Count: %d, UV Count: %d"), Triangles.Num(), RiverVertices.Num(), UVs.Num());
 	RiverMesh->CreateMeshSection(0, RiverVertices, Triangles, TArray<FVector>(), UVs, TArray<FColor>(), TArray<FProcMeshTangent>(), true);
 
 	RiverMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
@@ -489,15 +400,19 @@ void AuProcTerrainGenerator_CPP::UpdateTerrainSpline()
 		{
 			// Remove first spline point to keep length constant
 			PathSpline->RemoveSplinePoint(0);
+			for (int i = 0; i < VertCount; i++)
+			{
+				PathUVs.RemoveAt(i);
+			}
 		}
 
 		// Update spline with new points
 		PathSpline->UpdateSpline();
 
-		UpdateRiverSpline();
+		//UpdateRiverSpline();
 
 		GeneratePathMesh();
-		GenerateRiverMesh();
+		//GenerateRiverMesh();
 	}
 }
 

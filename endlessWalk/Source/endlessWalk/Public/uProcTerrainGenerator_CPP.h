@@ -55,13 +55,17 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain")
 	int SplinePoints = 100;
 
+	//Triangle horizontal vert count
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain")
+	int VertCount = 9;
+
 	// Frequency of terrain noise
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Noise")
 	float NoiseFrequency = 0.1f;
 
 	// Amplitude of terrain noise
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Noise")
-	float NoiseAmplitude = 50.0f;
+	float NoiseAmplitude = 15.0f;
 
 	// The distance at which to start adding new terrain planes
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain")
@@ -84,6 +88,9 @@ public:
 
 	TArray<FVector> RiverSplinePoints;
 	TArray<FVector> PathVertices;
+	TArray<FVector2D> PathUVs;
+	TArray<int32> PathTriangles;
+	bool TrianglesInitiated = false;
 	TArray<FVector> RiverVertices;
 	TArray<FVector2D> UVs;
 	TArray<int32> Triangles;

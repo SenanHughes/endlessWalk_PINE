@@ -103,6 +103,16 @@ struct Z_Construct_UClass_AuProcTerrainGenerator_CPP_Statics
 		{ "ToolTip", "Spline Steps" },
 #endif
 	};
+	static constexpr UECodeGen_Private::FMetaDataPairParam NewProp_VertCount_MetaData[] = {
+		{ "Category", "Terrain" },
+#if !UE_BUILD_SHIPPING
+		{ "Comment", "//Triangle horizontal vert count\n" },
+#endif
+		{ "ModuleRelativePath", "Public/uProcTerrainGenerator_CPP.h" },
+#if !UE_BUILD_SHIPPING
+		{ "ToolTip", "Triangle horizontal vert count" },
+#endif
+	};
 	static constexpr UECodeGen_Private::FMetaDataPairParam NewProp_NoiseFrequency_MetaData[] = {
 		{ "Category", "Noise" },
 #if !UE_BUILD_SHIPPING
@@ -164,6 +174,7 @@ struct Z_Construct_UClass_AuProcTerrainGenerator_CPP_Statics
 	static const UECodeGen_Private::FIntPropertyParams NewProp_RiverDepth;
 	static const UECodeGen_Private::FIntPropertyParams NewProp_MaxSplineLength;
 	static const UECodeGen_Private::FIntPropertyParams NewProp_SplinePoints;
+	static const UECodeGen_Private::FIntPropertyParams NewProp_VertCount;
 	static const UECodeGen_Private::FFloatPropertyParams NewProp_NoiseFrequency;
 	static const UECodeGen_Private::FFloatPropertyParams NewProp_NoiseAmplitude;
 	static const UECodeGen_Private::FIntPropertyParams NewProp_PlaneDistance;
@@ -189,6 +200,7 @@ const UECodeGen_Private::FIntPropertyParams Z_Construct_UClass_AuProcTerrainGene
 const UECodeGen_Private::FIntPropertyParams Z_Construct_UClass_AuProcTerrainGenerator_CPP_Statics::NewProp_RiverDepth = { "RiverDepth", nullptr, (EPropertyFlags)0x0010000000000015, UECodeGen_Private::EPropertyGenFlags::Int, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, STRUCT_OFFSET(AuProcTerrainGenerator_CPP, RiverDepth), METADATA_PARAMS(UE_ARRAY_COUNT(NewProp_RiverDepth_MetaData), NewProp_RiverDepth_MetaData) };
 const UECodeGen_Private::FIntPropertyParams Z_Construct_UClass_AuProcTerrainGenerator_CPP_Statics::NewProp_MaxSplineLength = { "MaxSplineLength", nullptr, (EPropertyFlags)0x0010000000000005, UECodeGen_Private::EPropertyGenFlags::Int, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, STRUCT_OFFSET(AuProcTerrainGenerator_CPP, MaxSplineLength), METADATA_PARAMS(UE_ARRAY_COUNT(NewProp_MaxSplineLength_MetaData), NewProp_MaxSplineLength_MetaData) };
 const UECodeGen_Private::FIntPropertyParams Z_Construct_UClass_AuProcTerrainGenerator_CPP_Statics::NewProp_SplinePoints = { "SplinePoints", nullptr, (EPropertyFlags)0x0010000000000005, UECodeGen_Private::EPropertyGenFlags::Int, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, STRUCT_OFFSET(AuProcTerrainGenerator_CPP, SplinePoints), METADATA_PARAMS(UE_ARRAY_COUNT(NewProp_SplinePoints_MetaData), NewProp_SplinePoints_MetaData) };
+const UECodeGen_Private::FIntPropertyParams Z_Construct_UClass_AuProcTerrainGenerator_CPP_Statics::NewProp_VertCount = { "VertCount", nullptr, (EPropertyFlags)0x0010000000000005, UECodeGen_Private::EPropertyGenFlags::Int, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, STRUCT_OFFSET(AuProcTerrainGenerator_CPP, VertCount), METADATA_PARAMS(UE_ARRAY_COUNT(NewProp_VertCount_MetaData), NewProp_VertCount_MetaData) };
 const UECodeGen_Private::FFloatPropertyParams Z_Construct_UClass_AuProcTerrainGenerator_CPP_Statics::NewProp_NoiseFrequency = { "NoiseFrequency", nullptr, (EPropertyFlags)0x0010000000000005, UECodeGen_Private::EPropertyGenFlags::Float, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, STRUCT_OFFSET(AuProcTerrainGenerator_CPP, NoiseFrequency), METADATA_PARAMS(UE_ARRAY_COUNT(NewProp_NoiseFrequency_MetaData), NewProp_NoiseFrequency_MetaData) };
 const UECodeGen_Private::FFloatPropertyParams Z_Construct_UClass_AuProcTerrainGenerator_CPP_Statics::NewProp_NoiseAmplitude = { "NoiseAmplitude", nullptr, (EPropertyFlags)0x0010000000000005, UECodeGen_Private::EPropertyGenFlags::Float, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, STRUCT_OFFSET(AuProcTerrainGenerator_CPP, NoiseAmplitude), METADATA_PARAMS(UE_ARRAY_COUNT(NewProp_NoiseAmplitude_MetaData), NewProp_NoiseAmplitude_MetaData) };
 const UECodeGen_Private::FIntPropertyParams Z_Construct_UClass_AuProcTerrainGenerator_CPP_Statics::NewProp_PlaneDistance = { "PlaneDistance", nullptr, (EPropertyFlags)0x0010000000000005, UECodeGen_Private::EPropertyGenFlags::Int, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, STRUCT_OFFSET(AuProcTerrainGenerator_CPP, PlaneDistance), METADATA_PARAMS(UE_ARRAY_COUNT(NewProp_PlaneDistance_MetaData), NewProp_PlaneDistance_MetaData) };
@@ -208,6 +220,7 @@ const UECodeGen_Private::FPropertyParamsBase* const Z_Construct_UClass_AuProcTer
 	(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_AuProcTerrainGenerator_CPP_Statics::NewProp_RiverDepth,
 	(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_AuProcTerrainGenerator_CPP_Statics::NewProp_MaxSplineLength,
 	(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_AuProcTerrainGenerator_CPP_Statics::NewProp_SplinePoints,
+	(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_AuProcTerrainGenerator_CPP_Statics::NewProp_VertCount,
 	(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_AuProcTerrainGenerator_CPP_Statics::NewProp_NoiseFrequency,
 	(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_AuProcTerrainGenerator_CPP_Statics::NewProp_NoiseAmplitude,
 	(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_AuProcTerrainGenerator_CPP_Statics::NewProp_PlaneDistance,
@@ -258,10 +271,10 @@ AuProcTerrainGenerator_CPP::~AuProcTerrainGenerator_CPP() {}
 struct Z_CompiledInDeferFile_FID_Users_senan_OneDrive_Documents_Masters_in_Computing_in_Comp_Anim_finalProject_projectFiles_endlessWalk_Source_endlessWalk_Public_uProcTerrainGenerator_CPP_h_Statics
 {
 	static constexpr FClassRegisterCompiledInInfo ClassInfo[] = {
-		{ Z_Construct_UClass_AuProcTerrainGenerator_CPP, AuProcTerrainGenerator_CPP::StaticClass, TEXT("AuProcTerrainGenerator_CPP"), &Z_Registration_Info_UClass_AuProcTerrainGenerator_CPP, CONSTRUCT_RELOAD_VERSION_INFO(FClassReloadVersionInfo, sizeof(AuProcTerrainGenerator_CPP), 740730174U) },
+		{ Z_Construct_UClass_AuProcTerrainGenerator_CPP, AuProcTerrainGenerator_CPP::StaticClass, TEXT("AuProcTerrainGenerator_CPP"), &Z_Registration_Info_UClass_AuProcTerrainGenerator_CPP, CONSTRUCT_RELOAD_VERSION_INFO(FClassReloadVersionInfo, sizeof(AuProcTerrainGenerator_CPP), 3721917396U) },
 	};
 };
-static FRegisterCompiledInInfo Z_CompiledInDeferFile_FID_Users_senan_OneDrive_Documents_Masters_in_Computing_in_Comp_Anim_finalProject_projectFiles_endlessWalk_Source_endlessWalk_Public_uProcTerrainGenerator_CPP_h_3953757940(TEXT("/Script/endlessWalk"),
+static FRegisterCompiledInInfo Z_CompiledInDeferFile_FID_Users_senan_OneDrive_Documents_Masters_in_Computing_in_Comp_Anim_finalProject_projectFiles_endlessWalk_Source_endlessWalk_Public_uProcTerrainGenerator_CPP_h_731067012(TEXT("/Script/endlessWalk"),
 	Z_CompiledInDeferFile_FID_Users_senan_OneDrive_Documents_Masters_in_Computing_in_Comp_Anim_finalProject_projectFiles_endlessWalk_Source_endlessWalk_Public_uProcTerrainGenerator_CPP_h_Statics::ClassInfo, UE_ARRAY_COUNT(Z_CompiledInDeferFile_FID_Users_senan_OneDrive_Documents_Masters_in_Computing_in_Comp_Anim_finalProject_projectFiles_endlessWalk_Source_endlessWalk_Public_uProcTerrainGenerator_CPP_h_Statics::ClassInfo),
 	nullptr, 0,
 	nullptr, 0);
