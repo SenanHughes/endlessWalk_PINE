@@ -37,7 +37,7 @@ void AuProcTerrainGenerator_CPP::BeginPlay()
 		for (int32 i = 0; i < SplinePoints; i++)
 		{
 			// Calculate position for each point
-			FVector NewPoint(i * PlaneDistance, FMath::Sin(i * 0.1f) * 100.0f, 0.0f);  // Simple sinusoidal curve for demonstration
+			FVector NewPoint((i * PlaneDistance) - (SplinePoints * PlaneDistance)/2, FMath::Sin(i * 0.1f) * 100.0f, 0.0f);  // Simple sinusoidal curve for demonstration
 			PathSpline->AddSplinePoint(NewPoint, ESplineCoordinateSpace::Local);
 		}
 
@@ -47,8 +47,10 @@ void AuProcTerrainGenerator_CPP::BeginPlay()
 	
 	CreateRiverSpline();
 
-	GeneratePathMesh();
-	GenerateRiverMesh();
+	//GeneratePathMesh
+	GenerateProcMesh(PathSpline, PathMesh, PathWidth, PathVertices, PathUVs, PathTriangles, PathNoiseBool, PathUVScale, PathMaterial);
+	//GenerateRiverMesh
+	GenerateProcMesh(RiverSpline, RiverMesh, RiverWidth, RiverVertices, RiverUVs, RiverTriangles, RiverNoiseBool, RiverUVScale, RiverMaterial);
 }
 
 // Called every frame
@@ -59,261 +61,106 @@ void AuProcTerrainGenerator_CPP::Tick(float DeltaTime)
 	UpdateTerrainSpline();
 }
 
-void AuProcTerrainGenerator_CPP::GeneratePathMesh()
+void AuProcTerrainGenerator_CPP::GenerateProcMesh(USplineComponent* GuideSpline, UProceduralMeshComponent* ProcMesh, int MeshWidth, TArray<FVector>& MeshVertices, 
+	TArray<FVector2D>& MeshUVs, TArray<int32>& MeshTriangles, bool NoiseRequired, int MeshUVScale, UMaterialInterface* MeshMaterial)
 {
-	FVector PathVert;
-	float NoiseValue;
-	//PathUVs.Empty();
+	static FVector MeshVert;
+	static FVector MeshLeftEdge;
+	static FVector MeshSplinePoint;
+	static FVector MeshSplineTangent;
+	static FVector MeshEdgeVector;
 
-	FastNoiseLite Noise;
+	static float NoiseValue;
+	static float offsetCalc;
+	static float MeshVertU;
+	static float MeshVertV;
+
+	static FastNoiseLite Noise;
+
 	Noise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
 	Noise.SetFrequency(NoiseFrequency);
 
-
 	for (int32 i = 0; i < SplinePoints; i++)
 	{
-		FVector PathSplinePoint = PathSpline->GetLocationAtSplinePoint(i, ESplineCoordinateSpace::Local);
-		FVector PathSplineTangent = PathSpline->GetTangentAtSplinePoint(i, ESplineCoordinateSpace::Local).GetSafeNormal();
+		MeshSplinePoint = GuideSpline->GetLocationAtSplinePoint(i, ESplineCoordinateSpace::Local);
+		MeshSplineTangent = GuideSpline->GetTangentAtSplinePoint(i, ESplineCoordinateSpace::Local).GetSafeNormal();
 
-		FVector PathEdgeVector = FVector(-PathSplineTangent.Y, PathSplineTangent.X, 0.0f);
+		MeshEdgeVector = FVector(-MeshSplineTangent.Y, MeshSplineTangent.X, 0.0f);
 
-		FVector PathLeftEdge = PathSplinePoint - PathEdgeVector * (PathWidth / 2);
-		//FVector PathRightEdge = PathSplinePoint + PathEdgeVector * (PathWidth / 2);
+		MeshLeftEdge = MeshSplinePoint - (MeshEdgeVector * (MeshWidth / 2));
 
 		for (int32 y = 0; y < VertCount; y++)
 		{
-			if (PathVertices.Num() < SplinePoints * VertCount)
+			if (MeshVertices.Num() < SplinePoints * VertCount)
 			{
 				// Vertice Position & Noise
-				float offsetCalc = ((PathWidth / 2.0f) * (y / ((VertCount - 1.0f) / 2.0f)));
-				PathVert = PathLeftEdge + (PathEdgeVector * offsetCalc);
-				NoiseValue = Noise.GetNoise(PathVert.X, PathVert.Y);
-				PathVert.Z = NoiseValue * NoiseAmplitude;
-				PathVertices.Add(PathVert);
+				
+				offsetCalc = ((MeshWidth / 2.0f) * (y / ((VertCount - 1.0f) / 2.0f)));
+				MeshVert = MeshLeftEdge + (MeshEdgeVector * offsetCalc);
+				if (NoiseRequired && (0 < y) && (y < VertCount - 1))
+				{
+					NoiseValue = Noise.GetNoise(MeshVert.X, MeshVert.Y);
+					MeshVert.Z = NoiseValue * NoiseAmplitude;
+				}
+				MeshVertices.Add(MeshVert);
 
-				// PathUVs
-				float PathVertU = PathVert.X / PathUVScale;
-				float PathVertV = PathVert.Y / PathUVScale;
-				PathUVs.Add(FVector2D(PathVertU, PathVertV));
+				// MeshUVs
+				MeshVertU = MeshVert.X / MeshUVScale;
+				MeshVertV = MeshVert.Y / MeshUVScale;
+				MeshUVs.Add(FVector2D(MeshVertU, MeshVertV));
 			}
 			else
 			{
 				int var = i * VertCount;
 				if (i < SplinePoints - 1)
 				{
-					PathVertices[var + y] = PathVertices[var + y + (VertCount)];
+					MeshVertices[var + y] = MeshVertices[var + y + (VertCount)];
 				}
 				else
 				{
-					float offsetCalc = ((PathWidth / 2.0f) * (y / ((VertCount - 1.0f) / 2.0f)));
-					PathVert = PathLeftEdge + (PathEdgeVector * offsetCalc);
-					NoiseValue = Noise.GetNoise(PathVert.X, PathVert.Y);
-					PathVert.Z = NoiseValue * NoiseAmplitude;
-					PathVertices[var + y] = PathVert;
+					offsetCalc = ((MeshWidth / 2.0f) * (y / ((VertCount - 1.0f) / 2.0f)));
+					MeshVert = MeshLeftEdge + (MeshEdgeVector * offsetCalc);
+					if (NoiseRequired && (0 < y) && (y < VertCount - 1))
+					{
+						NoiseValue = Noise.GetNoise(MeshVert.X, MeshVert.Y);
+						MeshVert.Z = NoiseValue * NoiseAmplitude;
+					}
+					MeshVertices[var + y] = MeshVert;
 
 					//UVs
-					float PathVertU = PathVert.X / PathUVScale;
-					float PathVertV = PathVert.Y / PathUVScale;
-					PathUVs.Add(FVector2D(PathVertU, PathVertV));
+					MeshVertU = MeshVert.X / MeshUVScale;
+					MeshVertV = MeshVert.Y / MeshUVScale;
+					MeshUVs.Add(FVector2D(MeshVertU, MeshVertV));
 				}
 			}
 		}
 	}
-
-	Triangles.Empty();
-	if (PathTriangles.Num() < (((SplinePoints - 1) * (VertCount-1)) * 6))
+	MeshTriangles.Empty();
+	if (MeshTriangles.Num() < (((SplinePoints - 1) * (VertCount-1)) * 6))
 	{
 		for (int i = 1; i < SplinePoints; i++)
 		{
 			for (int32 y = 0; y < VertCount - 1; y++)
 			{
 				int var = (i - 1) * VertCount;
-				PathTriangles.Add(var + y);
-				PathTriangles.Add(var + y + 1);
-				PathTriangles.Add(var + y + VertCount + 1);
-				PathTriangles.Add(var + y);
-				PathTriangles.Add(var + y + VertCount + 1);
-				PathTriangles.Add(var + y + VertCount);
+				MeshTriangles.Add(var + y);
+				MeshTriangles.Add(var + y + 1);
+				MeshTriangles.Add(var + y + VertCount + 1);
+				MeshTriangles.Add(var + y);
+				MeshTriangles.Add(var + y + VertCount + 1);
+				MeshTriangles.Add(var + y + VertCount);
 			}
 		}
 	}
 
-	PathMesh->CreateMeshSection(0, PathVertices, PathTriangles, TArray<FVector>(), PathUVs, TArray<FColor>(), TArray<FProcMeshTangent>(), true);
+	ProcMesh->CreateMeshSection(0, MeshVertices, MeshTriangles, TArray<FVector>(), MeshUVs, TArray<FColor>(), TArray<FProcMeshTangent>(), true);
 	
-	PathMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	ProcMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 
 	// Set the material
-	if (PathMaterial)
+	if (MeshMaterial)
 	{
-		PathMesh->SetMaterial(0, PathMaterial);
-	}
-}
-
-void AuProcTerrainGenerator_CPP::GenerateRiverMesh()
-{
-	UVs.Empty();
-
-	for (int32 i = 0; i < SplinePoints; i++)
-	{
-		FVector RiverSplinePoint = RiverSpline->GetLocationAtSplinePoint(i, ESplineCoordinateSpace::Local);
-		FVector RiverSplineTangent = RiverSpline->GetTangentAtSplinePoint(i, ESplineCoordinateSpace::Local).GetSafeNormal();
-
-		FVector RiverEdgeVector = FVector(-RiverSplineTangent.Y, RiverSplineTangent.X, 0.0f);
-
-		FVector RiverLeftEdge = RiverSplinePoint - RiverEdgeVector * (RiverWidth/2);
-		FVector RiverLeft3Quarter = RiverSplinePoint - RiverEdgeVector * ((RiverWidth / 2) * 0.75f);
-		FVector RiverLeft2Quarter = RiverSplinePoint - RiverEdgeVector * ((RiverWidth / 2) * 0.5f);
-		FVector RiverLeft1Quarter = RiverSplinePoint - RiverEdgeVector * ((RiverWidth / 2) * 0.25f);
-		FVector RiverRight1Quarter = RiverSplinePoint + RiverEdgeVector * ((RiverWidth / 2) * 0.25f);
-		FVector RiverRight2Quarter = RiverSplinePoint + RiverEdgeVector * ((RiverWidth / 2) * 0.5f);
-		FVector RiverRight3Quarter = RiverSplinePoint + RiverEdgeVector * ((RiverWidth / 2) * 0.75f);
-		FVector RiverRightEdge = RiverSplinePoint + RiverEdgeVector * (RiverWidth/2);
-
-
-		if (RiverVertices.Num() < SplinePoints * 9)
-		{
-			RiverVertices.Add(RiverLeftEdge);
-			RiverVertices.Add(RiverLeft3Quarter);
-			RiverVertices.Add(RiverLeft2Quarter);
-			RiverVertices.Add(RiverLeft1Quarter);
-			RiverVertices.Add(RiverSplinePoint);
-			RiverVertices.Add(RiverRight1Quarter);
-			RiverVertices.Add(RiverRight2Quarter);
-			RiverVertices.Add(RiverRight3Quarter);
-			RiverVertices.Add(RiverRightEdge);
-		}
-		else
-		{
-			int var = i * 9;
-			if (i < SplinePoints - 1)
-			{
-				RiverVertices[var] = RiverVertices[var + 9];
-				RiverVertices[var + 1] = RiverVertices[var + 10];
-				RiverVertices[var + 2] = RiverVertices[var + 11];
-				RiverVertices[var + 3] = RiverVertices[var + 12];
-				RiverVertices[var + 4] = RiverVertices[var + 13];
-				RiverVertices[var + 5] = RiverVertices[var + 14];
-				RiverVertices[var + 6] = RiverVertices[var + 15];
-				RiverVertices[var + 7] = RiverVertices[var + 16];
-				RiverVertices[var + 8] = RiverVertices[var + 17];
-			}
-			else
-			{
-				RiverVertices[var] = RiverLeftEdge;
-				RiverVertices[var + 1] = RiverLeft3Quarter;
-				RiverVertices[var + 2] = RiverLeft2Quarter;
-				RiverVertices[var + 3] = RiverLeft1Quarter;
-				RiverVertices[var + 4] = RiverSplinePoint;
-				RiverVertices[var + 5] = RiverRight1Quarter;
-				RiverVertices[var + 6] = RiverRight2Quarter;
-				RiverVertices[var + 7] = RiverRight3Quarter;
-				RiverVertices[var + 8] = RiverRightEdge;
-			}
-		}
-
-		float RiverLeftU = RiverLeftEdge.X / RiverUVScale;
-		float RiverLeftV = RiverLeftEdge.Y / RiverUVScale;
-		float RiverLeft3QU = RiverLeft3Quarter.X / RiverUVScale;
-		float RiverLeft3QV = RiverLeft3Quarter.Y / RiverUVScale;
-		float RiverLeft2QU = RiverLeft2Quarter.X / RiverUVScale;
-		float RiverLeft2QV = RiverLeft2Quarter.Y / RiverUVScale;
-		float RiverLeft1QU = RiverLeft1Quarter.X / RiverUVScale;
-		float RiverLeft1QV = RiverLeft1Quarter.Y / RiverUVScale;
-		float RiverCenterU = RiverSplinePoint.X / RiverUVScale;
-		float RiverCenterV = RiverSplinePoint.Y / RiverUVScale;
-		float RiverRight1QU = RiverRight1Quarter.X / RiverUVScale;
-		float RiverRight1QV = RiverRight1Quarter.Y / RiverUVScale;
-		float RiverRight2QU = RiverRight2Quarter.X / RiverUVScale;
-		float RiverRight2QV = RiverRight2Quarter.Y / RiverUVScale;
-		float RiverRight3QU = RiverRight3Quarter.X / RiverUVScale;
-		float RiverRight3QV = RiverRight3Quarter.Y / RiverUVScale;
-		float RiverRightU = RiverRightEdge.X / RiverUVScale;
-		float RiverRightV = RiverRightEdge.Y / RiverUVScale;
-
-
-		if (UVs.Num() < SplinePoints * 9)
-		{
-			UVs.Add(FVector2D(RiverLeftU, RiverLeftV));
-			UVs.Add(FVector2D(RiverLeft3QU, RiverLeft3QV));
-			UVs.Add(FVector2D(RiverLeft2QU, RiverLeft2QV));
-			UVs.Add(FVector2D(RiverLeft1QU, RiverLeft1QV));
-			UVs.Add(FVector2D(RiverCenterU, RiverCenterV));
-			UVs.Add(FVector2D(RiverRight1QU, RiverRight1QV));
-			UVs.Add(FVector2D(RiverRight2QU, RiverRight2QV));
-			UVs.Add(FVector2D(RiverRight3QU, RiverRight3QV));
-			UVs.Add(FVector2D(RiverRightU, RiverRightV));
-		}
-	}
-
-	Triangles.Empty();
-	for (int i = 1; i < SplinePoints; i++)
-	{
-		int32 StartIndex = (i - 1) * 9;
-		Triangles.Add(StartIndex);
-		Triangles.Add(StartIndex + 1);
-		Triangles.Add(StartIndex + 10);
-		Triangles.Add(StartIndex);
-		Triangles.Add(StartIndex + 10);
-		Triangles.Add(StartIndex + 9);
-
-		Triangles.Add(StartIndex + 1);
-		Triangles.Add(StartIndex + 2);
-		Triangles.Add(StartIndex + 11);
-		Triangles.Add(StartIndex + 1);
-		Triangles.Add(StartIndex + 11);
-		Triangles.Add(StartIndex + 10);
-
-		Triangles.Add(StartIndex + 2);
-		Triangles.Add(StartIndex + 3);
-		Triangles.Add(StartIndex + 12);
-		Triangles.Add(StartIndex + 2);
-		Triangles.Add(StartIndex + 12);
-		Triangles.Add(StartIndex + 11);
-
-		Triangles.Add(StartIndex + 3);
-		Triangles.Add(StartIndex + 4);
-		Triangles.Add(StartIndex + 13);
-		Triangles.Add(StartIndex + 3);
-		Triangles.Add(StartIndex + 13);
-		Triangles.Add(StartIndex + 12);
-
-		Triangles.Add(StartIndex + 4);
-		Triangles.Add(StartIndex + 5);
-		Triangles.Add(StartIndex + 14);
-		Triangles.Add(StartIndex + 4);
-		Triangles.Add(StartIndex + 14);
-		Triangles.Add(StartIndex + 13);
-
-		Triangles.Add(StartIndex + 5);
-		Triangles.Add(StartIndex + 6);
-		Triangles.Add(StartIndex + 15);
-		Triangles.Add(StartIndex + 5);
-		Triangles.Add(StartIndex + 15);
-		Triangles.Add(StartIndex + 14);
-
-		Triangles.Add(StartIndex + 6);
-		Triangles.Add(StartIndex + 7);
-		Triangles.Add(StartIndex + 16);
-		Triangles.Add(StartIndex + 6);
-		Triangles.Add(StartIndex + 16);
-		Triangles.Add(StartIndex + 15);
-
-		Triangles.Add(StartIndex + 7);
-		Triangles.Add(StartIndex + 8);
-		Triangles.Add(StartIndex + 17);
-		Triangles.Add(StartIndex + 7);
-		Triangles.Add(StartIndex + 17);
-		Triangles.Add(StartIndex + 16);
-	}
-	UE_LOG(LogTemp, Warning, TEXT("Triangle Count: %d, Vertice Count: %d, UV Count: %d"), Triangles.Num(), RiverVertices.Num(), UVs.Num());
-	RiverMesh->CreateMeshSection(0, RiverVertices, Triangles, TArray<FVector>(), UVs, TArray<FColor>(), TArray<FProcMeshTangent>(), true);
-
-	RiverMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-
-	// Set the material
-	if (RiverMaterial)
-	{
-		RiverMesh->SetMaterial(0, RiverMaterial);
+		ProcMesh->SetMaterial(0, MeshMaterial);
 	}
 }
 
@@ -345,11 +192,11 @@ void AuProcTerrainGenerator_CPP::UpdateTerrainSpline()
 
 		TimeElapsed += GetWorld()->GetDeltaSeconds(); // Track time progression
 
-		// Every 1-2 seconds, randomise curve behavior
-		if (FMath::Fmod(TimeElapsed, FMath::RandRange(3.0f, 6.0f)) < GetWorld()->GetDeltaSeconds())
+		// Every 3-6 seconds, randomise curve behavior
+		if (FMath::Fmod(TimeElapsed, FMath::RandRange(6.0f, 10.0f)) < GetWorld()->GetDeltaSeconds())
 		{
-			CurveSpeedMultiplier = FMath::RandRange(0.1f, 0.6f); // Makes turns speed up/slow down
-			SharpnessMultiplier = FMath::RandRange(75.0f, 125.0f); // Adjusts how sharp turns can be
+			CurveSpeedMultiplier = FMath::RandRange(0.5f, 1.0f); // Makes turns speed up/slow down
+			SharpnessMultiplier = FMath::RandRange(100.0f, 200.0f); // Adjusts how sharp turns can be
 			FrequencyMultiplier = FMath::RandRange(0.002f, 0.008f); // Adjusts how frequent turns occur
 		}
 
@@ -375,9 +222,12 @@ void AuProcTerrainGenerator_CPP::UpdateTerrainSpline()
 			}
 
 			AverageDeviation = TotalDeviation / CheckPoints;
+			UE_LOG(LogTemp, Warning, TEXT("Total Deviation: %f"), TotalDeviation);
+			UE_LOG(LogTemp, Warning, TEXT("Average Deviation: %f"), AverageDeviation);
 
 			// Define a "too straight" threshold (adjustable)
-			IsTooStraight = AverageDeviation < 200.0f; // If deviation is too small, force a turn
+			IsTooStraight = AverageDeviation < DeviationThreshold; // If deviation is too small, force a turn
+			UE_LOG(LogTemp, Warning, TEXT("Is Too Straight: %s"), IsTooStraight ? TEXT("True") : TEXT("False"));
 		}
 
 		if (IsTooStraight)
@@ -409,10 +259,11 @@ void AuProcTerrainGenerator_CPP::UpdateTerrainSpline()
 		// Update spline with new points
 		PathSpline->UpdateSpline();
 
-		//UpdateRiverSpline();
+		UpdateRiverSpline();
 
-		GeneratePathMesh();
+		GenerateProcMesh(PathSpline, PathMesh, PathWidth, PathVertices, PathUVs, PathTriangles, PathNoiseBool, PathUVScale, PathMaterial);
 		//GenerateRiverMesh();
+		GenerateProcMesh(RiverSpline, RiverMesh, RiverWidth, RiverVertices, RiverUVs, RiverTriangles, RiverNoiseBool, RiverUVScale, RiverMaterial);
 	}
 }
 
@@ -470,6 +321,10 @@ void AuProcTerrainGenerator_CPP::UpdateRiverSpline()
 	{
 		// Remove first spline point to keep length constant
 		RiverSpline->RemoveSplinePoint(0);
+		for (int i = 0; i < VertCount; i++)
+		{
+			RiverUVs.RemoveAt(i);
+		}
 	}
 
 	RiverSpline->UpdateSpline();

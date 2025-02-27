@@ -10,7 +10,8 @@
 
 // Forward Declarations
 class USplineComponent;
-class USplineComponent;
+class UProceduralMeshComponent;
+class UMaterialInterface;
 
 UCLASS()
 class ENDLESSWALK_API AuProcTerrainGenerator_CPP : public AActor
@@ -30,10 +31,10 @@ public:
 	USplineComponent* RiverSpline;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
-	UMaterialInterface* PathMaterial;
+	UMaterialInterface* PathMaterial = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
-	UMaterialInterface* RiverMaterial;
+	UMaterialInterface* RiverMaterial = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ProceduralMesh")
 	UProceduralMeshComponent* PathMesh;
@@ -42,7 +43,7 @@ public:
 	UProceduralMeshComponent* RiverMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "River")
-	int RiverOffset = 200;
+	int RiverOffset = 400;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "River")
 	int RiverDepth = 100;
@@ -59,6 +60,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain")
 	int VertCount = 9;
 
+	// Required noise check
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Noise")
+	bool PathNoiseBool = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Noise")
+	bool RiverNoiseBool = false;
+
 	// Frequency of terrain noise
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Noise")
 	float NoiseFrequency = 0.1f;
@@ -69,16 +77,19 @@ public:
 
 	// The distance at which to start adding new terrain planes
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain")
-	int PlaneDistance = 100;
+	int PlaneDistance = 400;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain")
 	int CheckPoints = 2;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Terrain")
-	int PathWidth = 200;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain")
+	float DeviationThreshold = 50.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Terrain")
-	int RiverWidth = 200;
+	int PathWidth = 400;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "River")
+	int RiverWidth = 400;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain")
 	int PathUVScale = 1000;
@@ -87,14 +98,14 @@ public:
 	int RiverUVScale = 1000;
 
 	TArray<FVector> RiverSplinePoints;
+
 	TArray<FVector> PathVertices;
 	TArray<FVector2D> PathUVs;
 	TArray<int32> PathTriangles;
-	bool TrianglesInitiated = false;
+
 	TArray<FVector> RiverVertices;
-	TArray<FVector2D> UVs;
-	TArray<int32> Triangles;
-	float DynamicSplineLength;
+	TArray<FVector2D> RiverUVs;
+	TArray<int32> RiverTriangles;
 
 protected:
 	// Called when the game starts or when spawned
@@ -104,9 +115,9 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-
-	void GenerateRiverMesh();
-	void GeneratePathMesh();
+	void GenerateProcMesh(USplineComponent* GuideSpline, UProceduralMeshComponent* ProcMesh, int MeshWidth, TArray<FVector> &MeshVertices, 
+		TArray<FVector2D> &MeshUVs, TArray<int32> &MeshTriangles, bool NoiseRequired, int MeshUVScale, UMaterialInterface* MeshMaterial);
+	
 	void UpdateTerrainSpline();
 	void CreateRiverSpline();
 	void UpdateRiverSpline();
