@@ -100,7 +100,8 @@ void AuProcTerrainGenerator_CPP::GenerateProcMesh(USplineComponent* GuideSpline,
 				if (NoiseRequired && (0 < y) && (y < VertCount - 1))
 				{
 					NoiseValue = Noise.GetNoise(MeshVert.X, MeshVert.Y);
-					MeshVert.Z = NoiseValue * NoiseAmplitude;
+					float Falloff = 1.0f - FMath::Pow(FMath::Abs(NoiseValue), 2.0f);
+					MeshVert.Z = (NoiseValue * Falloff) * NoiseAmplitude;
 				}
 				MeshVertices.Add(MeshVert);
 
@@ -123,7 +124,8 @@ void AuProcTerrainGenerator_CPP::GenerateProcMesh(USplineComponent* GuideSpline,
 					if (NoiseRequired && (0 < y) && (y < VertCount - 1))
 					{
 						NoiseValue = Noise.GetNoise(MeshVert.X, MeshVert.Y);
-						MeshVert.Z = NoiseValue * NoiseAmplitude;
+						float Falloff = 1.0f - FMath::Pow(FMath::Abs(NoiseValue), 2.0f);
+						MeshVert.Z = (NoiseValue * Falloff) * NoiseAmplitude;
 					}
 					MeshVertices[var + y] = MeshVert;
 
@@ -135,6 +137,7 @@ void AuProcTerrainGenerator_CPP::GenerateProcMesh(USplineComponent* GuideSpline,
 			}
 		}
 	}
+
 	MeshTriangles.Empty();
 	if (MeshTriangles.Num() < (((SplinePoints - 1) * (VertCount-1)) * 6))
 	{
@@ -222,12 +225,9 @@ void AuProcTerrainGenerator_CPP::UpdateTerrainSpline()
 			}
 
 			AverageDeviation = TotalDeviation / CheckPoints;
-			UE_LOG(LogTemp, Warning, TEXT("Total Deviation: %f"), TotalDeviation);
-			UE_LOG(LogTemp, Warning, TEXT("Average Deviation: %f"), AverageDeviation);
 
 			// Define a "too straight" threshold (adjustable)
 			IsTooStraight = AverageDeviation < DeviationThreshold; // If deviation is too small, force a turn
-			UE_LOG(LogTemp, Warning, TEXT("Is Too Straight: %s"), IsTooStraight ? TEXT("True") : TEXT("False"));
 		}
 
 		if (IsTooStraight)
