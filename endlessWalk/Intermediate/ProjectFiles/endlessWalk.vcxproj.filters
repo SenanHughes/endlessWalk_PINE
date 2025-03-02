@@ -42,13 +42,10 @@
     <Filter Include="Source\endlessWalk\Private">
       <UniqueIdentifier>{6DDC7403-81B2-3B40-9C59-87CED5F1F820}</UniqueIdentifier>
     </Filter>
-    <ClCompile Include="..\..\Source\endlessWalk\Private\TerrainGenerator.cpp">
-      <Filter>Source\endlessWalk\Private</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\endlessWalk\Private\uProcMeshTest_CPP.cpp">
-      <Filter>Source\endlessWalk\Private</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\endlessWalk\Private\uProcTerrainGenerator_CPP.cpp">
+      <Filter>Source\endlessWalk\Private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\endlessWalk\Private\uProc_StaticY_CPP.cpp">
       <Filter>Source\endlessWalk\Private</Filter>
     </ClCompile>
     <Filter Include="Source\endlessWalk\Public">
@@ -57,13 +54,10 @@
     <ClCompile Include="..\..\Source\endlessWalk\Public\FastNoiseLite.h">
       <Filter>Source\endlessWalk\Public</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\endlessWalk\Public\TerrainGenerator.h">
-      <Filter>Source\endlessWalk\Public</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\endlessWalk\Public\uProcMeshTest_CPP.h">
-      <Filter>Source\endlessWalk\Public</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\endlessWalk\Public\uProcTerrainGenerator_CPP.h">
+      <Filter>Source\endlessWalk\Public</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\endlessWalk\Public\uProc_StaticY_CPP.h">
       <Filter>Source\endlessWalk\Public</Filter>
     </ClCompile>
   </ItemGroup>

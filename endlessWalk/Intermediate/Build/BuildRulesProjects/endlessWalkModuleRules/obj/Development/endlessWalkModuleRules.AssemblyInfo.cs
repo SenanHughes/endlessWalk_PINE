@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("endlessWalkModuleRules")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Development")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5dba2c17093069e291a86175aab19d339f8b19bc")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+eb07a2c4c3f694c975c0fccfb0ebddd6d8993c8b")]
 [assembly: System.Reflection.AssemblyProductAttribute("endlessWalkModuleRules")]
 [assembly: System.Reflection.AssemblyTitleAttribute("endlessWalkModuleRules")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
