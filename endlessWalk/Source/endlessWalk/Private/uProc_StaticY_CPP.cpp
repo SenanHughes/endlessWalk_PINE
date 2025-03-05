@@ -45,13 +45,12 @@ void AuProc_StaticY_CPP::BeginPlay()
 		// Optionally, update the spline to ensure it's correct
 		PathSpline->UpdateSpline();
 	}
-
-	CreateRiverSpline();
+	//CreateRiverSpline();
 
 	//GeneratePathMesh
 	GenerateProcMesh(PathSpline, PathMesh, PathWidth, PathVertices, PathUVs, PathTriangles, PathNoiseBool, PathUVScale, PathMaterial);
 	//GenerateRiverMesh
-	GenerateProcMesh(RiverSpline, RiverMesh, RiverWidth, RiverVertices, RiverUVs, RiverTriangles, RiverNoiseBool, RiverUVScale, RiverMaterial);
+	//GenerateProcMesh(RiverSpline, RiverMesh, RiverWidth, RiverVertices, RiverUVs, RiverTriangles, RiverNoiseBool, RiverUVScale, RiverMaterial);
 }
 
 // Called every frame
@@ -81,6 +80,10 @@ void AuProc_StaticY_CPP::GenerateProcMesh(USplineComponent* GuideSpline, UProced
 	Noise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
 	Noise.SetFrequency(NoiseFrequency);
 
+	
+	//MeshVertices.Empty();
+	//MeshUVs.Empty();
+
 	for (int32 i = 0; i < SplinePoints; i++)
 	{
 		MeshSplinePoint = GuideSpline->GetLocationAtSplinePoint(i, ESplineCoordinateSpace::Local);
@@ -91,11 +94,10 @@ void AuProc_StaticY_CPP::GenerateProcMesh(USplineComponent* GuideSpline, UProced
 		MeshLeftEdge = MeshSplinePoint - (MeshEdgeVector * (MeshWidth / 2));
 
 		for (int32 y = 0; y < VertCount; y++)
-		{
-			if (MeshVertices.Num() < SplinePoints * VertCount)
+		{			
+			// Vertice Position & Noise
+			if (MeshVertices.Num() != SplinePoints * VertCount)
 			{
-				// Vertice Position & Noise
-
 				offsetCalc = ((MeshWidth / 2.0f) * (y / ((VertCount - 1.0f) / 2.0f)));
 				MeshVert = MeshLeftEdge + (MeshEdgeVector * offsetCalc);
 				if (NoiseRequired && (0 < y) && (y < VertCount - 1))
@@ -107,16 +109,77 @@ void AuProc_StaticY_CPP::GenerateProcMesh(USplineComponent* GuideSpline, UProced
 				MeshVertices.Add(MeshVert);
 
 				// MeshUVs
+			
+				/* {
+					if (i == SplinePoints - 1)
+					{
+						MeshUVs[(i * VertCount) + y].Y = MeshUVs[((i * VertCount) + y) + VertCount].Y;
+					}
+				}
+				else*/
+				
 				MeshVertU = MeshVert.X / MeshUVScale;
 				MeshVertV = MeshVert.Y / MeshUVScale;
+
 				MeshUVs.Add(FVector2D(MeshVertU, MeshVertV));
+				UE_LOG(LogTemp, Warning, TEXT("current UV: %s"), *MeshUVs[(i * VertCount) + y].ToString());
 			}
 			else
 			{
 				int var = i * VertCount;
 				if (i < SplinePoints - 1)
 				{
-					MeshVertices[var + y] = MeshVertices[var + y + (VertCount)];
+					//float DeltaY = MeshVertices[var + y + (VertCount)].Y - MeshVertices[var + y].Y;
+					float YUVWorldPosition = ProcMesh->GetComponentLocation().Y + MeshVertices[var + y].Y;
+					float YNewUVWorldPosition = ProcMesh->GetComponentLocation().Y + MeshVertices[var + y + (VertCount)].Y;
+					float XUVWorldPosition = ProcMesh->GetComponentLocation().X + MeshVertices[var + y].X;
+					float XNewUVWorldPosition = ProcMesh->GetComponentLocation().X + MeshVertices[var + y + (VertCount)].X;
+					float YWorldScale = ProcMesh->GetComponentScale().Y;
+
+					float DeltaY = YNewUVWorldPosition - YUVWorldPosition;
+					float DeltaX = XNewUVWorldPosition - XUVWorldPosition;
+
+					UE_LOG(LogTemp, Warning, TEXT("DeltaY: %f"), DeltaY);
+
+
+					MeshVertices[var + y].Y = MeshVertices[var + y + (VertCount)].Y;
+
+					MeshVertU = MeshVertices[var + y].X / MeshUVScale;
+					MeshVertV = MeshVertices[var + y].Y / MeshUVScale;
+
+					MeshUVs[var + y].X = MeshVertU;
+					MeshUVs[var + y].Y = MeshVertV;
+
+
+					//UE_LOG(LogTemp, Warning, TEXT("current UV: %f"), MeshUVs[var + y].Y);
+					//MeshUVs[var + y].Y = MeshUVs[var + y + (VertCount)].Y;
+					//UE_LOG(LogTemp, Warning, TEXT("DeltaY: %f"), DeltaY);
+					//MeshUVs[var + y].X -= (DeltaX);
+					//MeshUVs[var + y].Y -= (DeltaY);
+					UE_LOG(LogTemp, Warning, TEXT("current UV: %s"), *MeshUVs[var + y].ToString());
+				}
+				else
+				{
+					offsetCalc = ((MeshWidth / 2.0f) * (y / ((VertCount - 1.0f) / 2.0f)));
+					MeshVert = MeshLeftEdge + (MeshEdgeVector * offsetCalc);
+					if (NoiseRequired && (0 < y) && (y < VertCount - 1))
+					{
+						NoiseValue = Noise.GetNoise(MeshVert.X, MeshVert.Y);
+						float Falloff = 1.0f - FMath::Pow(FMath::Abs(NoiseValue), 2.0f);
+						MeshVert.Z = (NoiseValue * Falloff) * NoiseAmplitude;
+					}
+					MeshVertices[var + y].Y = MeshVert.Y;
+					MeshVertices[var + y].Z = MeshVert.Z;
+					MeshVertU = MeshVert.X / MeshUVScale;
+					MeshVertV = MeshVert.Y / MeshUVScale;
+					MeshUVs.Add(FVector2D(MeshVertU, MeshVertV));
+				}
+			}
+			/*else
+			{
+				if (i < SplinePoints - 1)
+				{
+						
 				}
 				else
 				{
@@ -135,12 +198,14 @@ void AuProc_StaticY_CPP::GenerateProcMesh(USplineComponent* GuideSpline, UProced
 					MeshVertV = MeshVert.Y / MeshUVScale;
 					MeshUVs.Add(FVector2D(MeshVertU, MeshVertV));
 				}
-			}
+			}*/
 		}
 	}
 
+	UE_LOG(LogTemp, Warning, TEXT("MeshUVs: %d"), MeshUVs.Num());
+
 	MeshTriangles.Empty();
-	if (MeshTriangles.Num() < (((SplinePoints - 1) * (VertCount - 1)) * 6))
+	if (MeshTriangles.Num() < (((SplinePoints - 1) * (VertCount - 1)) * 6)) // times 6 because it's the amount of points per triangle (2 triangles per square)
 	{
 		for (int i = 1; i < SplinePoints; i++)
 		{
@@ -156,7 +221,6 @@ void AuProc_StaticY_CPP::GenerateProcMesh(USplineComponent* GuideSpline, UProced
 			}
 		}
 	}
-
 	ProcMesh->CreateMeshSection(0, MeshVertices, MeshTriangles, TArray<FVector>(), MeshUVs, TArray<FColor>(), TArray<FProcMeshTangent>(), true);
 
 	ProcMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
@@ -174,38 +238,30 @@ void AuProc_StaticY_CPP::UpdateTerrainSpline()
 	{
 		return;
 	}
+	
+
+	static float CurrentCurveDirectionX = 0.0f;
+	static float CurrentCurveDirectionY = 0.0f;
+
+	static float CurveSpeedMultiplier = 0.1f;
+	static float SharpnessMultiplier = 100.0f;
+	static float FrequencyMultiplier = 0.005f;
+
+	static float TimeElapsed = 0.0f;
+	TimeElapsed += GetWorld()->GetDeltaSeconds(); // Track time progression
+	
 
 	FVector CharacterLocation = GetWorld()->GetFirstPlayerController()->GetPawn()->GetActorLocation();
-	FVector MidPoint = PathSpline->GetLocationAtSplinePoint(SplinePoints / 2, ESplineCoordinateSpace::Local);
 
-	if (FVector(CharacterLocation - MidPoint).Size2D() <= PathWidth / 2)
+	if (FMath::Fmod(TimeElapsed, 1.0f) < GetWorld()->GetDeltaSeconds())
 	{
 		FVector LastPoint = PathSpline->GetLocationAtSplinePoint(SplinePoints - 1, ESplineCoordinateSpace::Local);
-		FVector SecondLastPoint = PathSpline->GetLocationAtSplinePoint(SplinePoints - 2, ESplineCoordinateSpace::Local);
-
-		FVector Direction = LastPoint - SecondLastPoint;
-		Direction.Normalize();
-
-		static float CurrentCurveDirectionX = 0.0f;
-		static float CurrentCurveDirectionY = 0.0f;
-
-		static float CurveSpeedMultiplier = 0.1f;
-		static float SharpnessMultiplier = 100.0f;
-		static float FrequencyMultiplier = 0.005f;
-		static float TimeElapsed = 0.0f;
-
-		TimeElapsed += GetWorld()->GetDeltaSeconds(); // Track time progression
-
-		// Every 3-6 seconds, randomise curve behavior
-		if (FMath::Fmod(TimeElapsed, FMath::RandRange(6.0f, 10.0f)) < GetWorld()->GetDeltaSeconds())
-		{
-			CurveSpeedMultiplier = FMath::RandRange(0.5f, 1.0f); // Makes turns speed up/slow down
-			SharpnessMultiplier = FMath::RandRange(100.0f, 200.0f); // Adjusts how sharp turns can be
-			FrequencyMultiplier = FMath::RandRange(0.002f, 0.008f); // Adjusts how frequent turns occur
-		}
+		
+		CurveSpeedMultiplier = FMath::RandRange(0.5f, 1.0f); // Makes turns speed up/slow down
+		SharpnessMultiplier = FMath::RandRange(100.0f, 200.0f); // Adjusts how sharp turns can be
+		FrequencyMultiplier = FMath::RandRange(0.002f, 0.008f); // Adjusts how frequent turns occur
 
 		// Generate Perlin noise with the dynamically changing frequency
-		float NoiseValueX = FMath::PerlinNoise1D(LastPoint.X * FrequencyMultiplier) * SharpnessMultiplier;
 		float NoiseValueY = FMath::PerlinNoise1D(LastPoint.Y * FrequencyMultiplier) * SharpnessMultiplier;
 
 		// === Detect If the Path is Too Straight (Both X & Y) ===
@@ -221,8 +277,8 @@ void AuProc_StaticY_CPP::UpdateTerrainSpline()
 				FVector NextPoint = PathSpline->GetLocationAtSplinePoint(i + 1, ESplineCoordinateSpace::Local);
 
 				// Measure deviation in both X and Y
-				float XYDeviation = FVector(NextPoint - PrevPoint).Size2D(); // Only considers X and Y
-				TotalDeviation += XYDeviation;
+				float YDeviation = NextPoint.Y - PrevPoint.Y; // Only considers X
+				TotalDeviation += YDeviation;
 			}
 
 			AverageDeviation = TotalDeviation / CheckPoints;
@@ -233,38 +289,43 @@ void AuProc_StaticY_CPP::UpdateTerrainSpline()
 
 		if (IsTooStraight)
 		{
-			NoiseValueX += FMath::RandRange(-50.0f, 50.0f); // Strong forced curve in X
-			NoiseValueY += FMath::RandRange(-50.0f, 50.0f); // Strong forced curve in Y
+			NoiseValueY += FMath::RandRange(-50.0f, 50.0f); // Strong forced curve in X
 		}
 
-		CurrentCurveDirectionX = FMath::Lerp(CurrentCurveDirectionX, NoiseValueX, 0.1f * CurveSpeedMultiplier);
 		CurrentCurveDirectionY = FMath::Lerp(CurrentCurveDirectionY, NoiseValueY, 0.1f * CurveSpeedMultiplier);
 
-		FVector NewPoint = LastPoint + (Direction * PlaneDistance);
-		NewPoint.X += CurrentCurveDirectionX;
-		NewPoint.Y += CurrentCurveDirectionY;
-		NewPoint.Z = 0.0f; // Keep terrain flat
+		LastPoint.Y += CurrentCurveDirectionY;
 
-		// Add the new point to the spline
-		PathSpline->AddSplinePoint(NewPoint, ESplineCoordinateSpace::Local);
-		while (PathSpline->GetNumberOfSplinePoints() > SplinePoints)
+		for (int32 i = 0; i < PathSpline->GetNumberOfSplinePoints(); i++)
 		{
-			// Remove first spline point to keep length constant
-			PathSpline->RemoveSplinePoint(0);
-			for (int i = 0; i < VertCount; i++)
+			if (i < SplinePoints - 1)
 			{
-				PathUVs.RemoveAt(i);
+				if (i == 0)
+				{
+					for (int j = 0; j < VertCount; j++)
+					{
+						PathUVs.RemoveAt(j);
+					}
+				}
+				FVector nextPoint = PathSpline->GetLocationAtSplinePoint(i + 1, ESplineCoordinateSpace::Local);
+				FVector currentPoint = PathSpline->GetLocationAtSplinePoint(i, ESplineCoordinateSpace::Local);
+				currentPoint.Y = nextPoint.Y;
+				PathSpline->SetLocationAtSplinePoint(i, currentPoint, ESplineCoordinateSpace::Local);
+			}
+			else
+			{
+				PathSpline->SetLocationAtSplinePoint(SplinePoints - 1, LastPoint, ESplineCoordinateSpace::Local);
 			}
 		}
 
 		// Update spline with new points
 		PathSpline->UpdateSpline();
 
-		UpdateRiverSpline();
+		//UpdateRiverSpline();
 
 		GenerateProcMesh(PathSpline, PathMesh, PathWidth, PathVertices, PathUVs, PathTriangles, PathNoiseBool, PathUVScale, PathMaterial);
 		//GenerateRiverMesh();
-		GenerateProcMesh(RiverSpline, RiverMesh, RiverWidth, RiverVertices, RiverUVs, RiverTriangles, RiverNoiseBool, RiverUVScale, RiverMaterial);
+		//GenerateProcMesh(RiverSpline, RiverMesh, RiverWidth, RiverVertices, RiverUVs, RiverTriangles, RiverNoiseBool, RiverUVScale, RiverMaterial);
 	}
 }
 

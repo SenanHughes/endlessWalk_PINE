@@ -43,22 +43,22 @@ public:
 	UProceduralMeshComponent* RiverMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "River")
-	int RiverOffset = 400;
+	int32 RiverOffset = 400;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "River")
-	int RiverDepth = 100;
+	int32 RiverDepth = 100;
 
 	// Maximum length of the spline (10,000 units)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain")
-	int MaxSplineLength = 10000;
+	int32 MaxSplineLength = 10000;
 
 	// Spline Steps
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain")
-	int SplinePoints = 100;
+	int32 SplinePoints = 100;
 
 	//Triangle horizontal vert count
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain")
-	int VertCount = 9;
+	int32 VertCount = 9;
 
 	// Required noise check
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Noise")
@@ -77,25 +77,27 @@ public:
 
 	// The distance at which to start adding new terrain planes
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain")
-	int PlaneDistance = 400;
+	int32 PlaneDistance = 400;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain")
-	int CheckPoints = 2;
+	int32 CheckPoints = 2;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain")
 	float DeviationThreshold = 50.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Terrain")
-	int PathWidth = 400;
+	int32 PathWidth = 400;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "River")
-	int RiverWidth = 400;
+	int32 RiverWidth = 400;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain")
-	int PathUVScale = 1000;
+	int32 PathUVScale = 1000;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "River")
-	int RiverUVScale = 1000;
+	int32 RiverUVScale = 1000;
+
+	float UVOffset;
 
 	TArray<FVector> RiverSplinePoints;
 

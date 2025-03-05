@@ -42,6 +42,9 @@
     <Filter Include="Source\endlessWalk\Private">
       <UniqueIdentifier>{6DDC7403-81B2-3B40-9C59-87CED5F1F820}</UniqueIdentifier>
     </Filter>
+    <ClCompile Include="..\..\Source\endlessWalk\Private\NewFunctionTesting_CPP.cpp">
+      <Filter>Source\endlessWalk\Private</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\endlessWalk\Private\uProcTerrainGenerator_CPP.cpp">
       <Filter>Source\endlessWalk\Private</Filter>
     </ClCompile>
@@ -52,6 +55,9 @@
       <UniqueIdentifier>{CCCE0563-1181-3237-98A9-FF7FC3A4F2E6}</UniqueIdentifier>
     </Filter>
     <ClCompile Include="..\..\Source\endlessWalk\Public\FastNoiseLite.h">
+      <Filter>Source\endlessWalk\Public</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\endlessWalk\Public\NewFunctionTesting_CPP.h">
       <Filter>Source\endlessWalk\Public</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\endlessWalk\Public\uProcTerrainGenerator_CPP.h">
