@@ -13,8 +13,10 @@ void EmptyLinkFunctionForGeneratedCodeuProcTerrainGenerator_CPP() {}
 ENDLESSWALK_API UClass* Z_Construct_UClass_AuProcTerrainGenerator_CPP();
 ENDLESSWALK_API UClass* Z_Construct_UClass_AuProcTerrainGenerator_CPP_NoRegister();
 ENGINE_API UClass* Z_Construct_UClass_AActor();
+ENGINE_API UClass* Z_Construct_UClass_UInstancedStaticMeshComponent_NoRegister();
 ENGINE_API UClass* Z_Construct_UClass_UMaterialInterface_NoRegister();
 ENGINE_API UClass* Z_Construct_UClass_USplineComponent_NoRegister();
+ENGINE_API UClass* Z_Construct_UClass_UStaticMesh_NoRegister();
 PROCEDURALMESHCOMPONENT_API UClass* Z_Construct_UClass_UProceduralMeshComponent_NoRegister();
 UPackage* Z_Construct_UPackage__Script_endlessWalk();
 // End Cross Module References
@@ -181,6 +183,42 @@ struct Z_Construct_UClass_AuProcTerrainGenerator_CPP_Statics
 		{ "Category", "River" },
 		{ "ModuleRelativePath", "Public/uProcTerrainGenerator_CPP.h" },
 	};
+	static constexpr UECodeGen_Private::FMetaDataPairParam NewProp_AssetToSpawn_MetaData[] = {
+		{ "Category", "Procedural" },
+#if !UE_BUILD_SHIPPING
+		{ "Comment", "/** Static Mesh to Spawn */" },
+#endif
+		{ "ModuleRelativePath", "Public/uProcTerrainGenerator_CPP.h" },
+#if !UE_BUILD_SHIPPING
+		{ "ToolTip", "Static Mesh to Spawn" },
+#endif
+	};
+	static constexpr UECodeGen_Private::FMetaDataPairParam NewProp_AssetToSpawn2_MetaData[] = {
+		{ "Category", "Procedural" },
+		{ "ModuleRelativePath", "Public/uProcTerrainGenerator_CPP.h" },
+	};
+	static constexpr UECodeGen_Private::FMetaDataPairParam NewProp_InstancedMesh_MetaData[] = {
+		{ "Category", "Procedural" },
+		{ "EditInline", "true" },
+		{ "ModuleRelativePath", "Public/uProcTerrainGenerator_CPP.h" },
+	};
+	static constexpr UECodeGen_Private::FMetaDataPairParam NewProp_InstancedMesh2_MetaData[] = {
+		{ "Category", "Procedural" },
+		{ "EditInline", "true" },
+		{ "ModuleRelativePath", "Public/uProcTerrainGenerator_CPP.h" },
+	};
+	static constexpr UECodeGen_Private::FMetaDataPairParam NewProp_NumAssetsToSpawn_MetaData[] = {
+		{ "Category", "Procedural" },
+		{ "ClampMin", "1" },
+#if !UE_BUILD_SHIPPING
+		{ "Comment", "/** Number of assets to spawn */" },
+#endif
+		{ "ModuleRelativePath", "Public/uProcTerrainGenerator_CPP.h" },
+#if !UE_BUILD_SHIPPING
+		{ "ToolTip", "Number of assets to spawn" },
+#endif
+		{ "UIMin", "1" },
+	};
 #endif // WITH_METADATA
 	static const UECodeGen_Private::FObjectPropertyParams NewProp_PathSpline;
 	static const UECodeGen_Private::FObjectPropertyParams NewProp_RiverSpline;
@@ -206,6 +244,11 @@ struct Z_Construct_UClass_AuProcTerrainGenerator_CPP_Statics
 	static const UECodeGen_Private::FIntPropertyParams NewProp_RiverWidth;
 	static const UECodeGen_Private::FIntPropertyParams NewProp_PathUVScale;
 	static const UECodeGen_Private::FIntPropertyParams NewProp_RiverUVScale;
+	static const UECodeGen_Private::FObjectPropertyParams NewProp_AssetToSpawn;
+	static const UECodeGen_Private::FObjectPropertyParams NewProp_AssetToSpawn2;
+	static const UECodeGen_Private::FObjectPropertyParams NewProp_InstancedMesh;
+	static const UECodeGen_Private::FObjectPropertyParams NewProp_InstancedMesh2;
+	static const UECodeGen_Private::FIntPropertyParams NewProp_NumAssetsToSpawn;
 	static const UECodeGen_Private::FPropertyParamsBase* const PropPointers[];
 	static UObject* (*const DependentSingletons[])();
 	static constexpr FCppClassTypeInfoStatic StaticCppClassTypeInfo = {
@@ -243,6 +286,11 @@ const UECodeGen_Private::FIntPropertyParams Z_Construct_UClass_AuProcTerrainGene
 const UECodeGen_Private::FIntPropertyParams Z_Construct_UClass_AuProcTerrainGenerator_CPP_Statics::NewProp_RiverWidth = { "RiverWidth", nullptr, (EPropertyFlags)0x0010000000000015, UECodeGen_Private::EPropertyGenFlags::Int, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, STRUCT_OFFSET(AuProcTerrainGenerator_CPP, RiverWidth), METADATA_PARAMS(UE_ARRAY_COUNT(NewProp_RiverWidth_MetaData), NewProp_RiverWidth_MetaData) };
 const UECodeGen_Private::FIntPropertyParams Z_Construct_UClass_AuProcTerrainGenerator_CPP_Statics::NewProp_PathUVScale = { "PathUVScale", nullptr, (EPropertyFlags)0x0010000000000005, UECodeGen_Private::EPropertyGenFlags::Int, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, STRUCT_OFFSET(AuProcTerrainGenerator_CPP, PathUVScale), METADATA_PARAMS(UE_ARRAY_COUNT(NewProp_PathUVScale_MetaData), NewProp_PathUVScale_MetaData) };
 const UECodeGen_Private::FIntPropertyParams Z_Construct_UClass_AuProcTerrainGenerator_CPP_Statics::NewProp_RiverUVScale = { "RiverUVScale", nullptr, (EPropertyFlags)0x0010000000000005, UECodeGen_Private::EPropertyGenFlags::Int, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, STRUCT_OFFSET(AuProcTerrainGenerator_CPP, RiverUVScale), METADATA_PARAMS(UE_ARRAY_COUNT(NewProp_RiverUVScale_MetaData), NewProp_RiverUVScale_MetaData) };
+const UECodeGen_Private::FObjectPropertyParams Z_Construct_UClass_AuProcTerrainGenerator_CPP_Statics::NewProp_AssetToSpawn = { "AssetToSpawn", nullptr, (EPropertyFlags)0x0010000000000001, UECodeGen_Private::EPropertyGenFlags::Object, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, STRUCT_OFFSET(AuProcTerrainGenerator_CPP, AssetToSpawn), Z_Construct_UClass_UStaticMesh_NoRegister, METADATA_PARAMS(UE_ARRAY_COUNT(NewProp_AssetToSpawn_MetaData), NewProp_AssetToSpawn_MetaData) };
+const UECodeGen_Private::FObjectPropertyParams Z_Construct_UClass_AuProcTerrainGenerator_CPP_Statics::NewProp_AssetToSpawn2 = { "AssetToSpawn2", nullptr, (EPropertyFlags)0x0010000000000001, UECodeGen_Private::EPropertyGenFlags::Object, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, STRUCT_OFFSET(AuProcTerrainGenerator_CPP, AssetToSpawn2), Z_Construct_UClass_UStaticMesh_NoRegister, METADATA_PARAMS(UE_ARRAY_COUNT(NewProp_AssetToSpawn2_MetaData), NewProp_AssetToSpawn2_MetaData) };
+const UECodeGen_Private::FObjectPropertyParams Z_Construct_UClass_AuProcTerrainGenerator_CPP_Statics::NewProp_InstancedMesh = { "InstancedMesh", nullptr, (EPropertyFlags)0x00100000000a0009, UECodeGen_Private::EPropertyGenFlags::Object, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, STRUCT_OFFSET(AuProcTerrainGenerator_CPP, InstancedMesh), Z_Construct_UClass_UInstancedStaticMeshComponent_NoRegister, METADATA_PARAMS(UE_ARRAY_COUNT(NewProp_InstancedMesh_MetaData), NewProp_InstancedMesh_MetaData) };
+const UECodeGen_Private::FObjectPropertyParams Z_Construct_UClass_AuProcTerrainGenerator_CPP_Statics::NewProp_InstancedMesh2 = { "InstancedMesh2", nullptr, (EPropertyFlags)0x00100000000a0009, UECodeGen_Private::EPropertyGenFlags::Object, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, STRUCT_OFFSET(AuProcTerrainGenerator_CPP, InstancedMesh2), Z_Construct_UClass_UInstancedStaticMeshComponent_NoRegister, METADATA_PARAMS(UE_ARRAY_COUNT(NewProp_InstancedMesh2_MetaData), NewProp_InstancedMesh2_MetaData) };
+const UECodeGen_Private::FIntPropertyParams Z_Construct_UClass_AuProcTerrainGenerator_CPP_Statics::NewProp_NumAssetsToSpawn = { "NumAssetsToSpawn", nullptr, (EPropertyFlags)0x0010000000000001, UECodeGen_Private::EPropertyGenFlags::Int, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, STRUCT_OFFSET(AuProcTerrainGenerator_CPP, NumAssetsToSpawn), METADATA_PARAMS(UE_ARRAY_COUNT(NewProp_NumAssetsToSpawn_MetaData), NewProp_NumAssetsToSpawn_MetaData) };
 const UECodeGen_Private::FPropertyParamsBase* const Z_Construct_UClass_AuProcTerrainGenerator_CPP_Statics::PropPointers[] = {
 	(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_AuProcTerrainGenerator_CPP_Statics::NewProp_PathSpline,
 	(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_AuProcTerrainGenerator_CPP_Statics::NewProp_RiverSpline,
@@ -266,6 +314,11 @@ const UECodeGen_Private::FPropertyParamsBase* const Z_Construct_UClass_AuProcTer
 	(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_AuProcTerrainGenerator_CPP_Statics::NewProp_RiverWidth,
 	(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_AuProcTerrainGenerator_CPP_Statics::NewProp_PathUVScale,
 	(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_AuProcTerrainGenerator_CPP_Statics::NewProp_RiverUVScale,
+	(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_AuProcTerrainGenerator_CPP_Statics::NewProp_AssetToSpawn,
+	(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_AuProcTerrainGenerator_CPP_Statics::NewProp_AssetToSpawn2,
+	(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_AuProcTerrainGenerator_CPP_Statics::NewProp_InstancedMesh,
+	(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_AuProcTerrainGenerator_CPP_Statics::NewProp_InstancedMesh2,
+	(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_AuProcTerrainGenerator_CPP_Statics::NewProp_NumAssetsToSpawn,
 };
 static_assert(UE_ARRAY_COUNT(Z_Construct_UClass_AuProcTerrainGenerator_CPP_Statics::PropPointers) < 2048);
 UObject* (*const Z_Construct_UClass_AuProcTerrainGenerator_CPP_Statics::DependentSingletons[])() = {
@@ -308,10 +361,10 @@ AuProcTerrainGenerator_CPP::~AuProcTerrainGenerator_CPP() {}
 struct Z_CompiledInDeferFile_FID_Users_senan_OneDrive_Documents_Masters_in_Computing_in_Comp_Anim_finalProject_projectFiles_endlessWalk_Source_endlessWalk_Public_uProcTerrainGenerator_CPP_h_Statics
 {
 	static constexpr FClassRegisterCompiledInInfo ClassInfo[] = {
-		{ Z_Construct_UClass_AuProcTerrainGenerator_CPP, AuProcTerrainGenerator_CPP::StaticClass, TEXT("AuProcTerrainGenerator_CPP"), &Z_Registration_Info_UClass_AuProcTerrainGenerator_CPP, CONSTRUCT_RELOAD_VERSION_INFO(FClassReloadVersionInfo, sizeof(AuProcTerrainGenerator_CPP), 193487400U) },
+		{ Z_Construct_UClass_AuProcTerrainGenerator_CPP, AuProcTerrainGenerator_CPP::StaticClass, TEXT("AuProcTerrainGenerator_CPP"), &Z_Registration_Info_UClass_AuProcTerrainGenerator_CPP, CONSTRUCT_RELOAD_VERSION_INFO(FClassReloadVersionInfo, sizeof(AuProcTerrainGenerator_CPP), 4056608734U) },
 	};
 };
-static FRegisterCompiledInInfo Z_CompiledInDeferFile_FID_Users_senan_OneDrive_Documents_Masters_in_Computing_in_Comp_Anim_finalProject_projectFiles_endlessWalk_Source_endlessWalk_Public_uProcTerrainGenerator_CPP_h_2893156063(TEXT("/Script/endlessWalk"),
+static FRegisterCompiledInInfo Z_CompiledInDeferFile_FID_Users_senan_OneDrive_Documents_Masters_in_Computing_in_Comp_Anim_finalProject_projectFiles_endlessWalk_Source_endlessWalk_Public_uProcTerrainGenerator_CPP_h_3540276423(TEXT("/Script/endlessWalk"),
 	Z_CompiledInDeferFile_FID_Users_senan_OneDrive_Documents_Masters_in_Computing_in_Comp_Anim_finalProject_projectFiles_endlessWalk_Source_endlessWalk_Public_uProcTerrainGenerator_CPP_h_Statics::ClassInfo, UE_ARRAY_COUNT(Z_CompiledInDeferFile_FID_Users_senan_OneDrive_Documents_Masters_in_Computing_in_Comp_Anim_finalProject_projectFiles_endlessWalk_Source_endlessWalk_Public_uProcTerrainGenerator_CPP_h_Statics::ClassInfo),
 	nullptr, 0,
 	nullptr, 0);

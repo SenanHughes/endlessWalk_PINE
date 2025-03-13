@@ -6,6 +6,9 @@
 #include "GameFramework/Actor.h"
 #include "ProceduralMeshComponent.h"
 #include "Components/SplineComponent.h"
+#include "FastNoiseLite.h"
+#include "Engine/StaticMeshActor.h"
+#include "Components/InstancedStaticMeshComponent.h"
 #include "uProcTerrainGenerator_CPP.generated.h"
 
 // Forward Declarations
@@ -97,6 +100,28 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "River")
 	int RiverUVScale = 1000;
 
+
+
+	/** Static Mesh to Spawn */
+	UPROPERTY(EditAnywhere, Category = "Procedural")
+	UStaticMesh* AssetToSpawn;
+
+	UPROPERTY(EditAnywhere, Category = "Procedural")
+	UStaticMesh* AssetToSpawn2;
+
+	UPROPERTY(VisibleAnywhere, Category = "Procedural")
+	UInstancedStaticMeshComponent* InstancedMesh;
+
+	UPROPERTY(VisibleAnywhere, Category = "Procedural")
+	UInstancedStaticMeshComponent* InstancedMesh2;
+
+	/** Number of assets to spawn */
+	UPROPERTY(EditAnywhere, Category = "Procedural", meta = (ClampMin = "1", UIMin = "1"))
+	int32 NumAssetsToSpawn;
+
+
+
+
 	TArray<FVector> RiverSplinePoints;
 
 	TArray<FVector> PathVertices;
@@ -107,6 +132,22 @@ public:
 	TArray<FVector2D> RiverUVs;
 	TArray<int32> RiverTriangles;
 
+	bool PathMeshInitiated = false;
+	bool RiverMeshInitiated = false;
+
+	FVector MeshVert;
+	FVector MeshLeftEdge;
+	FVector MeshSplinePoint;
+	FVector MeshSplineTangent;
+	FVector MeshEdgeVector;
+
+	float NoiseValue;
+	float offsetCalc;
+	float MeshVertU;
+	float MeshVertV;
+
+	FastNoiseLite Noise;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -116,9 +157,14 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	void GenerateProcMesh(USplineComponent* GuideSpline, UProceduralMeshComponent* ProcMesh, int MeshWidth, TArray<FVector> &MeshVertices, 
-		TArray<FVector2D> &MeshUVs, TArray<int32> &MeshTriangles, bool NoiseRequired, int MeshUVScale, UMaterialInterface* MeshMaterial);
+		TArray<FVector2D> &MeshUVs, TArray<int32> &MeshTriangles, bool NoiseRequired, int MeshUVScale, UMaterialInterface* MeshMaterial, bool& MeshInitiated);
+
+	void UpdateProcMesh(USplineComponent* GuideSpline, UProceduralMeshComponent* ProcMesh, int MeshWidth, TArray<FVector>& MeshVertices,
+		TArray<FVector2D>& MeshUVs, TArray<int32>& MeshTriangles, bool NoiseRequired, int MeshUVScale, UMaterialInterface* MeshMaterial);
 	
 	void UpdateTerrainSpline();
 	void CreateRiverSpline();
 	void UpdateRiverSpline();
+
+	void SpawnProceduralAssets();
 };

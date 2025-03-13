@@ -45,6 +45,9 @@
     <ClCompile Include="..\..\Source\endlessWalk\Private\TerrainGenerator.cpp">
       <Filter>Source\endlessWalk\Private</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\endlessWalk\Private\uProcAssetScatter_CPP.cpp">
+      <Filter>Source\endlessWalk\Private</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\endlessWalk\Private\uProcMeshTest_CPP.cpp">
       <Filter>Source\endlessWalk\Private</Filter>
     </ClCompile>
@@ -58,6 +61,9 @@
       <Filter>Source\endlessWalk\Public</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\endlessWalk\Public\TerrainGenerator.h">
+      <Filter>Source\endlessWalk\Public</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\endlessWalk\Public\uProcAssetScatter_CPP.h">
       <Filter>Source\endlessWalk\Public</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\endlessWalk\Public\uProcMeshTest_CPP.h">
