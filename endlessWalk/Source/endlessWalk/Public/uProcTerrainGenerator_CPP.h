@@ -127,6 +127,7 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Procedural", meta = (ClampMin = "1", UIMin = "1"))
 	int32 NumAssetsToSpawn;
 
+	bool bInitialised = false;
 
 	bool validPoint = false;
 	FVector SphereCenter;
@@ -137,18 +138,16 @@ public:
 	TArray<FVector> PathVertices = TArray<FVector>();
 	TArray<FVector2D> PathUVs = TArray<FVector2D>();
 	TArray<int32> PathTriangles = TArray<int32>();
-	TArray<FVector> PathNormals = TArray<FVector>();
-	TArray<FProcMeshTangent> PathTangents = TArray<FProcMeshTangent>();
 
 	TArray<FVector> RiverVertices = TArray<FVector>();
 	TArray<FVector2D> RiverUVs = TArray<FVector2D>();
 	TArray<int32> RiverTriangles = TArray<int32>();
+	TArray<FVector> NoisyRiverEdge = TArray<FVector>();
 
 	TArray<FVector> MoundVertices = TArray<FVector>();
 	TArray<FVector2D> MoundUVs = TArray<FVector2D>();
 	TArray<int32> MoundTriangles = TArray<int32>();
-	TArray<FVector> MoundNormals = TArray<FVector>();
-	TArray<FProcMeshTangent> MoundTangents = TArray<FProcMeshTangent>();
+	TArray<FVector> NoisyMoundEdge = TArray<FVector>();
 
 	FVector MeshVert = FVector::ZeroVector;
 	FVector MeshPathEdge = FVector::ZeroVector;
@@ -181,6 +180,12 @@ public:
 	float Falloff = 0.0f;
 	float zHeight = 600.0f;
 
+	float SharpnessMultiplier = 50.0f;
+	float FrequencyMultiplier = 0.003f;
+
+	FVector CharacterLocation = FVector::ZeroVector;
+	APawn* CharacterPawn;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -188,20 +193,24 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	void LimitMovementSmoothly(USplineComponent* GuideSpline, float MaxDistance, float PullSpeed);
 		
 	void UpdateTerrainSpline();
 
 	bool IsPointInsideSphere(FVector Point, FVector SphereCenter, float SphereRadius);
 
+	void SplineRegulator(USplineComponent* GuideSpline);
+
 	void GeneratePathMesh(USplineComponent* GuideSpline, UProceduralMeshComponent* ProcMesh, int MeshWidth, TArray<FVector>& MeshVertices,
-		TArray<FVector2D>& MeshUVs, TArray<int32>& MeshTriangles, int MeshUVScale, UMaterialInterface* MeshMaterial, int PathVertCount, TArray<FVector>& MeshNormals, TArray<FProcMeshTangent>& MeshTangents);
+		TArray<FVector2D>& MeshUVs, TArray<int32>& MeshTriangles, int MeshUVScale, UMaterialInterface* MeshMaterial, int PathVertCount);
 
 	FVector PathMeshHelper(int y, int MeshWidth, FVector& MeshEdge);
 
-	FVector MoundMeshHelper(int y, int MeshWidth, float& zValue, float zOffset);
+	FVector MoundMeshHelper(int y, int MeshWidth, float& zValue, float zOffset, int i);
 
 	void UpdatePathMesh(USplineComponent* GuideSpline, UProceduralMeshComponent* ProcMesh, int MeshWidth, TArray<FVector>& MeshVertices,
-		TArray<FVector2D>& MeshUVs, TArray<int32>& MeshTriangles, int MeshUVScale, UMaterialInterface* MeshMaterial, int PathVertCount, TArray<FVector>& MeshNormals, TArray<FProcMeshTangent>& MeshTangents);
+		TArray<FVector2D>& MeshUVs, TArray<int32>& MeshTriangles, int MeshUVScale, UMaterialInterface* MeshMaterial, int PathVertCount);
 
 	void GenerateRiverMesh(USplineComponent* GuideSpline, UProceduralMeshComponent* ProcMesh, int MeshWidth, TArray<FVector>& MeshVertices,
 		TArray<FVector2D>& MeshUVs, TArray<int32>& MeshTriangles, int MeshUVScale, UMaterialInterface* MeshMaterial, int RiverVertCount);
@@ -210,10 +219,10 @@ public:
 		TArray<FVector2D>& MeshUVs, TArray<int32>& MeshTriangles, int MeshUVScale, UMaterialInterface* MeshMaterial, int RiverVertCount);
 
 	void GenerateMoundMesh(USplineComponent* GuideSpline, UProceduralMeshComponent* ProcMesh, int MeshWidth, TArray<FVector>& MeshVertices,
-		TArray<FVector2D>& MeshUVs, TArray<int32>& MeshTriangles, int MeshUVScale, UMaterialInterface* MeshMaterial, int MoundVertCount, TArray<FVector>& MeshNormals, TArray<FProcMeshTangent>& MeshTangents);
+		TArray<FVector2D>& MeshUVs, TArray<int32>& MeshTriangles, int MeshUVScale, UMaterialInterface* MeshMaterial, int MoundVertCount);
 
 	void UpdateMoundMesh(USplineComponent* GuideSpline, UProceduralMeshComponent* ProcMesh, int MeshWidth, TArray<FVector>& MeshVertices,
-		TArray<FVector2D>& MeshUVs, TArray<int32>& MeshTriangles, int MeshUVScale, UMaterialInterface* MeshMaterial, int MoundVertCount, TArray<FVector>& MeshNormals, TArray<FProcMeshTangent>& MeshTangents);
+		TArray<FVector2D>& MeshUVs, TArray<int32>& MeshTriangles, int MeshUVScale, UMaterialInterface* MeshMaterial, int MoundVertCount);
 
 	void SpawnProceduralAssets();
 	void UpdateProceduralAssets();
