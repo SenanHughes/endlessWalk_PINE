@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "uProcTerrainGenerator_CPP.h"
+#include "DrawDebugHelpers.h"
 
 // Sets default values
 AuProcTerrainGenerator_CPP::AuProcTerrainGenerator_CPP()
@@ -58,6 +59,11 @@ void AuProcTerrainGenerator_CPP::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (RiverMaterial)
+	{
+		DynamicRiverMaterial = UMaterialInstanceDynamic::Create(RiverMaterial, this);
+	}
+
 	// Ensure the spline is correctly set up
 	if (PathSpline)
 	{
@@ -100,7 +106,7 @@ void AuProcTerrainGenerator_CPP::BeginPlay()
 	//FMeshGeneration::GeneratePathMesh(PathSpline, PathMesh, PathWidth, PathVertices, PathUVs, PathTriangles, PathUVScale, PathMaterial, PathVertCount, SplinePoints, RiverDepth, NoiseAmplitude, RiverSpline);
 
 	//GenerateRiverMesh
-	GenerateRiverMesh(RiverSpline, RiverMesh, RiverWidth, RiverVertices, RiverUVs, RiverTriangles, RiverUVScale, RiverMaterial, RiverVertCount);
+	GenerateRiverMesh(RiverSpline, RiverMesh, RiverWidth, RiverVertices, RiverUVs, RiverTriangles, RiverUVScale, DynamicRiverMaterial, RiverVertCount);
 
 	//GenerateMoundMesh
 	GenerateMoundMesh(MoundSpline, MoundMesh, MoundWidth, MoundVertices, MoundUVs, MoundTriangles, MoundUVScale, MoundMaterial, MoundVertCount);
@@ -128,6 +134,105 @@ void AuProcTerrainGenerator_CPP::Tick(float DeltaTime)
 	}
 
 	LimitMovementSmoothly(PathSpline, PathWidth * 0.2f, 5.0f);
+	UpdateMaterialPanner(DeltaTime);
+}
+
+void AuProcTerrainGenerator_CPP::UpdateMaterialPanner(float DeltaTime)
+{
+	if (DynamicRiverMaterial)
+	{
+		TargetPannerDirection = FVector::ZeroVector;
+
+		for (int i = (SplinePoints / 2) - 5; i < (SplinePoints / 2) + 5; i++)
+		{
+			FVector CurrentPos = RiverSpline->GetLocationAtSplinePoint(i, ESplineCoordinateSpace::World);
+			FVector NextPos = RiverSpline->GetLocationAtSplinePoint(i + 1, ESplineCoordinateSpace::World);
+
+			TargetPannerDirection += (NextPos - CurrentPos).GetSafeNormal();
+		}
+
+		TargetPannerDirection = TargetPannerDirection.GetSafeNormal(); // Normalize the direction
+
+		if (CurrentPannerDirection.IsNearlyZero())
+		{
+			CurrentPannerDirection = TargetPannerDirection;
+		}
+
+		CurrentPannerDirection = FMath::VInterpTo(CurrentPannerDirection, TargetPannerDirection, DeltaTime, TimeLimit);
+
+		FVector UpdatedDirection = CurrentPannerDirection * 0.1f;
+		FVector PannerDirection2 = FVector(CurrentPannerDirection.X * CurrentPannerDirection.Y, -(CurrentPannerDirection.X * CurrentPannerDirection.Y), 0.0f) * 0.05f;
+	
+		// Set the "PannerDirection" parameter in the material
+		DynamicRiverMaterial->SetDoubleVectorParameterValue(FName("PannerDirection"), FLinearColor(UpdatedDirection.X, UpdatedDirection.Y, 0.0f, 0.0f));
+		//DynamicRiverMaterial->SetDoubleVectorParameterValue(FName("PannerDirection2"), FLinearColor(PannerDirection2.X, PannerDirection2.Y, 0.0f, 0.0f));
+	}
+
+	/*if (DynamicRiverMaterial && RiverSpline)
+	{
+		int32 ClosestIndex = RiverSpline->FindInputKeyClosestToWorldLocation(CharacterLocation);
+
+		TargetPannerDirection = RiverSpline->GetTangentAtSplinePoint(ClosestIndex, ESplineCoordinateSpace::World).GetSafeNormal();
+
+		if (CurrentPannerDirection == FVector::ZeroVector)
+		{
+			CurrentPannerDirection = TargetPannerDirection;
+		}
+
+		int32 NextIndex = FMath::Clamp(ClosestIndex + 1, 0, RiverSpline->GetNumberOfSplinePoints() - 1);
+		FVector NextTangent = RiverSpline->GetTangentAtSplinePoint(NextIndex, ESplineCoordinateSpace::World).GetSafeNormal();
+
+		float CurveFactor = FMath::Clamp(FVector::DotProduct(TargetPannerDirection, NextTangent), 0.5f, 1.0f);
+
+		CurrentPannerDirection = FMath::VInterpTo(CurrentPannerDirection, TargetPannerDirection, DeltaTime, TimeLimit);
+
+		CurrentPannerDirection *= (0.5f);
+		UE_LOG(LogTemp, Warning, TEXT("UpdatedDirection: %s"), *CurrentPannerDirection.ToString());
+
+		DrawDebugLine(GetWorld(), CharacterLocation, CharacterLocation + CurrentPannerDirection * 1000.0f, FColor::Green, false, 0.1f, 0, 1.0f);
+
+		DynamicRiverMaterial->SetDoubleVectorParameterValue(FName("PannerDirection"), FLinearColor(CurrentPannerDirection.X, CurrentPannerDirection.Y, 0.0f, 0.0f));
+	}*/
+
+	/*if (DynamicRiverMaterial && RiverSpline)
+	{
+		FVector AverageDirection = FVector::ZeroVector;
+
+		for (int i = (SplinePoints / 2) - 1; i < (SplinePoints / 2) + 9; i++)
+		{
+			FVector CurrentPos = RiverSpline->GetLocationAtSplinePoint(i, ESplineCoordinateSpace::World);
+			FVector NextPos = RiverSpline->GetLocationAtSplinePoint(i + 1, ESplineCoordinateSpace::World);
+
+			FVector Direction = (NextPos - CurrentPos).GetSafeNormal();
+			AverageDirection += Direction;  // Sum up the direction vectors
+		}
+
+		// Average the directions
+		AverageDirection = AverageDirection / 10.0f;
+
+		// Normalize the average direction to get the final rotation direction
+		FVector TargetDirection = AverageDirection.GetSafeNormal();
+
+		// Calculate the previous spline point for direction comparison
+		FVector PreviousPos = RiverSpline->GetLocationAtSplinePoint((SplinePoints / 2) - 2, ESplineCoordinateSpace::World);
+		FVector CurrentPos = RiverSpline->GetLocationAtSplinePoint((SplinePoints / 2) - 1, ESplineCoordinateSpace::World);
+		FVector CurrentDirection = (CurrentPos - PreviousPos).GetSafeNormal();
+
+		// Calculate the angle between the current direction and target direction
+		float DotProduct = FVector::DotProduct(CurrentDirection, TargetDirection);
+		float Angle = FMath::Acos(FMath::Clamp(DotProduct, -1.0f, 1.0f)); // Angle in radians
+		float AngleInDegrees = FMath::RadiansToDegrees(Angle);
+
+		// Normalize the angle to a value between 0 and 1 (based on 180 degrees max)
+		float MaxRotation = 360.0f;
+		float TargetNormalisedRotation = FMath::Clamp(AngleInDegrees / MaxRotation, 0.0f, 1.0f);
+
+		// Smoothly interpolate the normalized rotation value over time
+		CurrentRotation = FMath::FInterpTo(CurrentRotation, TargetNormalisedRotation, DeltaTime, 5.0f); // Adjust the speed of interpolation with the last parameter (higher = faster)
+
+		DynamicRiverMaterial->SetScalarParameterValue(FName("RotationAngle"), CurrentRotation);
+		UE_LOG(LogTemp, Warning, TEXT("CurrentRotation: %f, Angle: %f"), CurrentRotation, Angle);
+	}*/
 }
 
 void AuProcTerrainGenerator_CPP::LimitMovementSmoothly(USplineComponent* GuideSpline, float MaxDistance, float PullSpeed)
@@ -219,7 +324,7 @@ void AuProcTerrainGenerator_CPP::UpdateTerrainSpline()
 	UpdatePathMesh(PathSpline, PathMesh, PathWidth, PathVertices, PathUVs, PathTriangles, PathUVScale, PathMaterial, PathVertCount);
 
 	//GenerateRiverMesh();
-	UpdateRiverMesh(RiverSpline, RiverMesh, RiverWidth, RiverVertices, RiverUVs, RiverTriangles, RiverUVScale, RiverMaterial, RiverVertCount);
+	UpdateRiverMesh(RiverSpline, RiverMesh, RiverWidth, RiverVertices, RiverUVs, RiverTriangles, RiverUVScale, DynamicRiverMaterial, RiverVertCount);
 
 	//GenerateMoundMesh();
 	UpdateMoundMesh(MoundSpline, MoundMesh, MoundWidth, MoundVertices, MoundUVs, MoundTriangles, MoundUVScale, MoundMaterial, MoundVertCount);
@@ -669,7 +774,6 @@ FVector AuProcTerrainGenerator_CPP::MoundMeshHelper(int y, int MeshWidth, float&
 	{
 		MeshVert = NoisyMoundEdge[i];
 	}
-	UE_LOG(LogTemp, Warning, TEXT("Mesh Z value is %f"), MeshVert.Z);
 	return MeshVert;
 }
 

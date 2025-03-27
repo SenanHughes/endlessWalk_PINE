@@ -47,6 +47,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
 	UMaterialInterface* RiverMaterial = nullptr;
 
+	UPROPERTY();
+	UMaterialInstanceDynamic* DynamicRiverMaterial;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
 	UMaterialInterface* MoundMaterial = nullptr;
 
@@ -67,7 +70,7 @@ public:
 
 	// Spline Steps
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain")
-	int SplinePoints = 100;
+	int SplinePoints = 200;
 
 	//Triangle horizontal vert count
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain")
@@ -89,13 +92,13 @@ public:
 
 	// The distance at which to start adding new terrain planes
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain")
-	int PlaneDistance = 400;
+	int PlaneDistance = 100;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Terrain")
-	int PathWidth = 400;
+	int PathWidth = 600;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "River")
-	int RiverWidth = 400;
+	int RiverWidth = 600;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mound")
 	int MoundWidth = 400;
@@ -186,6 +189,12 @@ public:
 	FVector CharacterLocation = FVector::ZeroVector;
 	APawn* CharacterPawn;
 
+	float CurrentRotation = 0.0f;
+
+	FVector TargetPannerDirection = FVector::ZeroVector;
+	FVector CurrentPannerDirection = FVector::ZeroVector;
+	float TimeLimit = 0.5f;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -193,6 +202,8 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	void UpdateMaterialPanner(float DeltaTime);
 
 	void LimitMovementSmoothly(USplineComponent* GuideSpline, float MaxDistance, float PullSpeed);
 		
