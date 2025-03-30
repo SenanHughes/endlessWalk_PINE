@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright Epic Games, Inc. All Rights Reserved.
 
 using UnrealBuildTool;
 using System.Collections.Generic;
@@ -9,8 +9,7 @@ public class endlessWalkEditorTarget : TargetRules
 	{
 		Type = TargetType.Editor;
 		DefaultBuildSettings = BuildSettingsVersion.V5;
-        IncludeOrderVersion = EngineIncludeOrderVersion.Latest;
-
-        ExtraModuleNames.AddRange( new string[] { "endlessWalk" } );
+		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_5;
+		ExtraModuleNames.Add("endlessWalk");
 	}
 }

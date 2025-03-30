@@ -22,26 +22,6 @@
 			]
 		},
 		{
-			"Name": "Water",
-			"Enabled": true
-		},
-		{
-			"Name": "WaterExtras",
-			"Enabled": true
-		},
-		{
-			"Name": "WaterAdvanced",
-			"Enabled": true
-		},
-		{
-			"Name": "PCG",
-			"Enabled": true
-		},
-		{
-			"Name": "PCGGeometryScriptInterop",
-			"Enabled": true
-		},
-		{
 			"Name": "OpenXR",
 			"Enabled": true,
 			"SupportedTargetPlatforms": [
