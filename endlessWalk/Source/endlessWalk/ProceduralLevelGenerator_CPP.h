@@ -26,6 +26,10 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Terrain")
 	USplineComponent* PathSpline;
 
+	// The Spline to generate terrain along
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Wall")
+	USplineComponent* WallSpline;
+
 	// The Spline to generate river along
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "River")
 	USplineComponent* RiverSpline;
@@ -38,6 +42,9 @@ public:
 	UMaterialInterface* PathMaterial = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
+	UMaterialInterface* WallMaterial = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
 	UMaterialInterface* RiverMaterial = nullptr;
 
 	UPROPERTY();
@@ -48,6 +55,9 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ProceduralMesh")
 	UProceduralMeshComponent* PathMesh;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ProceduralMesh")
+	UProceduralMeshComponent* WallMesh;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ProceduralMesh")
 	UProceduralMeshComponent* RiverMesh;
@@ -67,13 +77,13 @@ public:
 
 	//Triangle horizontal vert count
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain")
-	int PathVertCount = 9;
+	int PathVertCount = 12;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "River")
-	int RiverVertCount = 9;
+	int RiverVertCount = 2;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mound")
-	int MoundVertCount = 9;
+	int MoundVertCount = 12;
 
 	// Frequency of terrain noise
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Noise")
@@ -94,16 +104,10 @@ public:
 	int RiverWidth = 600;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mound")
-	int MoundWidth = 400;
+	int MoundWidth = 600;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain")
-	int PathUVScale = 1000;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "River")
-	int RiverUVScale = 1000;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mound")
-	int MoundUVScale = 1000;
+	int WallUVScale = 1000;
 
 
 	/** Static Mesh to Spawn */
@@ -137,10 +141,17 @@ public:
 	TArray<FVector> NewPathVerts = TArray<FVector>();
 	TArray<int32> PathTriangles = TArray<int32>();
 
+	TArray<FVector> WallVertices = TArray<FVector>();
+	TArray<FVector> WallNormals = TArray<FVector>();
+	TArray<FVector2D> WallUVs = TArray<FVector2D>();
+	TArray<FProcMeshTangent> WallTangents = TArray<FProcMeshTangent>();
+	TArray<int32> WallTriangles = TArray<int32>();
+	TArray<FVector> NoisyWallEdge = TArray<FVector>();
+
 	TArray<FVector> RiverVertices = TArray<FVector>();
 	TArray<FVector> RiverNormals = TArray<FVector>();
+	TArray<FVector2D> RiverUVs = TArray<FVector2D>();
 	TArray<FProcMeshTangent> RiverTangents = TArray<FProcMeshTangent>();
-	TArray<FVector> RiverTangentsArray = TArray<FVector>();
 	TArray<int32> RiverTriangles = TArray<int32>();
 	TArray<FVector> NoisyRiverEdge = TArray<FVector>();
 
@@ -151,9 +162,7 @@ public:
 	TArray<int32> MoundTriangles = TArray<int32>();
 	TArray<FVector> NoisyMoundEdge = TArray<FVector>();
 
-
 	FVector MeshVert = FVector::ZeroVector;
-	FVector MeshPathEdge = FVector::ZeroVector;
 	FVector MeshLeftEdge = FVector::ZeroVector;
 	FVector MeshSplinePoint = FVector::ZeroVector;
 	FVector MeshSplineTangent = FVector::ZeroVector;
@@ -189,16 +198,6 @@ public:
 	FVector CharacterLocation = FVector::ZeroVector;
 	APawn* CharacterPawn;
 
-	float CurrentRotation = 0.0f;
-
-	FVector TargetPannerDirection = FVector::ZeroVector;
-	FVector CurrentPannerDirection = FVector::ZeroVector;
-	float TimeLimit = 0.5f;
-
-	TArray<int32> PathMeshTriangles;
-	TArray<int32> RiverMeshTriangles;
-	TArray<int32> MoundMeshTriangles;
-
 	float TimeValue;
 	TArray<FLinearColor> VertexColours;
 
@@ -209,8 +208,6 @@ protected:
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
-	void UpdateMaterialPanner(float DeltaTime);
 
 	void LimitMovementSmoothly(USplineComponent* GuideSpline, float MaxDistance, float PullSpeed);
 
@@ -224,29 +221,34 @@ public:
 
 	void SplineRegulator(USplineComponent* GuideSpline);
 
-	void GeneratePathMesh(USplineComponent* GuideSpline, UProceduralMeshComponent* ProcMesh, int MeshWidth, TArray<FVector>& MeshVertices,
-		TArray<FVector>& MeshNormals, TArray<FProcMeshTangent>& MeshTangents, TArray<int32>& MeshTriangles, int MeshUVScale, UMaterialInterface* MeshMaterial, int PathVertCount);
-
 	FVector PathMeshHelper(int y, int MeshWidth, FVector& MeshEdge);
 
 	FVector MoundMeshHelper(int y, int MeshWidth, float& zValue, float zOffset, int i);
 
+	void GeneratePathMesh(USplineComponent* GuideSpline, UProceduralMeshComponent* ProcMesh, int MeshWidth, TArray<FVector>& MeshVertices,
+		TArray<FVector>& MeshNormals, TArray<FProcMeshTangent>& MeshTangents, TArray<int32>& MeshTriangles, UMaterialInterface* MeshMaterial, int PathVertCount);
+
 	void UpdatePathMesh(USplineComponent* GuideSpline, UProceduralMeshComponent* ProcMesh, int MeshWidth, TArray<FVector>& MeshVertices,
-		TArray<FVector>& MeshNormals, TArray<FProcMeshTangent>& MeshTangents, TArray<int32>& MeshTriangles, int MeshUVScale, UMaterialInterface* MeshMaterial, int PathVertCount);
+		TArray<FVector>& MeshNormals, TArray<FProcMeshTangent>& MeshTangents, TArray<int32>& MeshTriangles, UMaterialInterface* MeshMaterial, int PathVertCount);
 
 	void GenerateRiverMesh(USplineComponent* GuideSpline, UProceduralMeshComponent* ProcMesh, int MeshWidth, TArray<FVector>& MeshVertices,
-		TArray<FVector>& MeshNormals, TArray<FProcMeshTangent>& MeshTangents, TArray<int32>& MeshTriangles, int MeshUVScale, UMaterialInterface* MeshMaterial, int RiverVertCount);
+		TArray<FVector>& MeshNormals, TArray<FProcMeshTangent>& MeshTangents, TArray<int32>& MeshTriangles, UMaterialInterface* MeshMaterial, int RiverVertCount);
 
 	void UpdateRiverMesh(USplineComponent* GuideSpline, UProceduralMeshComponent* ProcMesh, int MeshWidth, TArray<FVector>& MeshVertices,
-		TArray<FVector>& MeshNormals, TArray<FProcMeshTangent>& MeshTangents, TArray<int32>& MeshTriangles, int MeshUVScale, UMaterialInterface* MeshMaterial, int RiverVertCount);
+		TArray<FVector>& MeshNormals, TArray<FProcMeshTangent>& MeshTangents, TArray<int32>& MeshTriangles, UMaterialInterface* MeshMaterial, int RiverVertCount);
 
 	void GenerateMoundMesh(USplineComponent* GuideSpline, UProceduralMeshComponent* ProcMesh, int MeshWidth, TArray<FVector>& MeshVertices,
-		TArray<FVector>& MeshNormals, TArray<FProcMeshTangent>& MeshTangents, TArray<int32>& MeshTriangles, int MeshUVScale, UMaterialInterface* MeshMaterial, int MoundVertCount);
+		TArray<FVector>& MeshNormals, TArray<FProcMeshTangent>& MeshTangents, TArray<int32>& MeshTriangles, UMaterialInterface* MeshMaterial, int MoundVertCount);
 
 	void UpdateMoundMesh(USplineComponent* GuideSpline, UProceduralMeshComponent* ProcMesh, int MeshWidth, TArray<FVector>& MeshVertices,
-		TArray<FVector>& MeshNormals, TArray<FProcMeshTangent>& MeshTangents, TArray<int32>& MeshTriangles, int MeshUVScale, UMaterialInterface* MeshMaterial, int MoundVertCount);
+		TArray<FVector>& MeshNormals, TArray<FProcMeshTangent>& MeshTangents, TArray<int32>& MeshTriangles, UMaterialInterface* MeshMaterial, int MoundVertCount);
+
+	void GenerateWallMesh(USplineComponent* GuideSpline, UProceduralMeshComponent* ProcMesh, int MeshWidth, TArray<FVector>& MeshVertices,
+		TArray<FVector>& MeshNormals, TArray<FProcMeshTangent>& MeshTangents, TArray<int32>& MeshTriangles, TArray<FVector2D>& MeshUVs, int MeshUVScale, UMaterialInterface* MeshMaterial, int RiverVertCount);
+
+	void UpdateWallMesh(USplineComponent* GuideSpline, UProceduralMeshComponent* ProcMesh, int MeshWidth, TArray<FVector>& MeshVertices,
+		TArray<FVector>& MeshNormals, TArray<FProcMeshTangent>& MeshTangents, TArray<int32>& MeshTriangles, TArray<FVector2D>& MeshUVs, int MeshUVScale, UMaterialInterface* MeshMaterial, int RiverVertCount);
 
 	void SpawnProceduralAssets();
 	void UpdateProceduralAssets();
-	UTexture2D* GenerateFlowMapTexture();
 };

@@ -99,13 +99,13 @@ void AProceduralLevelGenerator_CPP::BeginPlay()
 
 	//GeneratePathMesh
 	//FMeshGeneration::GeneratePathMesh(PathSpline, PathMesh, PathWidth, PathVertices, PathUVs, PathTriangles, PathUVScale, PathMaterial, PathVertCount, SplinePoints, RiverDepth, NoiseAmplitude, RiverSpline);
-	GeneratePathMesh(PathSpline, PathMesh, PathWidth, PathVertices, PathNormals, PathTangents, PathTriangles, PathUVScale, PathMaterial, PathVertCount);
+	GeneratePathMesh(PathSpline, PathMesh, PathWidth, PathVertices, PathNormals, PathTangents, PathTriangles, PathMaterial, PathVertCount);
 
 	//GenerateRiverMesh();
-	GenerateRiverMesh(RiverSpline, RiverMesh, RiverWidth, RiverVertices, RiverNormals, RiverTangents, RiverTriangles, RiverUVScale, DynamicRiverMaterial, RiverVertCount);
+	GenerateRiverMesh(RiverSpline, RiverMesh, RiverWidth, RiverVertices, RiverNormals, RiverTangents, RiverTriangles, DynamicRiverMaterial, RiverVertCount);
 
 	//GenerateMoundMesh();
-	GenerateMoundMesh(MoundSpline, MoundMesh, MoundWidth, MoundVertices, MoundNormals, MoundTangents, MoundTriangles, MoundUVScale, MoundMaterial, MoundVertCount);
+	GenerateMoundMesh(MoundSpline, MoundMesh, MoundWidth, MoundVertices, MoundNormals, MoundTangents, MoundTriangles, MoundMaterial, MoundVertCount);
 
 	SpawnProceduralAssets();
 }
@@ -225,22 +225,23 @@ void AProceduralLevelGenerator_CPP::UpdateTerrainSpline()
 	// Update spline with new points
 	PathSpline->UpdateSpline();
 
-	UpdatePathMesh(PathSpline, PathMesh, PathWidth, PathVertices, PathNormals, PathTangents, PathTriangles, PathUVScale, PathMaterial, PathVertCount);
+	UpdatePathMesh(PathSpline, PathMesh, PathWidth, PathVertices, PathNormals, PathTangents, PathTriangles, PathMaterial, PathVertCount);
 
 	//GenerateRiverMesh();
-	UpdateRiverMesh(RiverSpline, RiverMesh, RiverWidth, RiverVertices, RiverNormals, RiverTangents, RiverTriangles, RiverUVScale, DynamicRiverMaterial, RiverVertCount);
+	UpdateRiverMesh(RiverSpline, RiverMesh, RiverWidth, RiverVertices, RiverNormals, RiverTangents, RiverTriangles, DynamicRiverMaterial, RiverVertCount);
 
 	//GenerateMoundMesh();
-	UpdateMoundMesh(MoundSpline, MoundMesh, MoundWidth, MoundVertices, MoundNormals, MoundTangents, MoundTriangles, MoundUVScale, MoundMaterial, MoundVertCount);
+	UpdateMoundMesh(MoundSpline, MoundMesh, MoundWidth, MoundVertices, MoundNormals, MoundTangents, MoundTriangles, MoundMaterial, MoundVertCount);
 
 	UpdateProceduralAssets();
 }
 
 
+
 void AProceduralLevelGenerator_CPP::GeneratePathMesh(USplineComponent* GuideSpline, UProceduralMeshComponent* ProcMesh, int MeshWidth, TArray<FVector>& MeshVertices,
-	TArray<FVector>& MeshNormals, TArray<FProcMeshTangent>& MeshTangents, TArray<int32>& MeshTriangles, int MeshUVScale, UMaterialInterface* MeshMaterial, int PathVerts)
+	TArray<FVector>& MeshNormals, TArray<FProcMeshTangent>& MeshTangents, TArray<int32>& MeshTriangles, UMaterialInterface* MeshMaterial, int PathVerts)
 {
-	depthOffset = RiverDepth / (PathVertCount / 4.0f);
+	depthOffset = RiverDepth / (PathVerts / 4.0f);
 
 	for (int32 i = 0; i < SplinePoints; i++)
 	{
@@ -249,7 +250,7 @@ void AProceduralLevelGenerator_CPP::GeneratePathMesh(USplineComponent* GuideSpli
 
 		MeshEdgeVector = FVector(-MeshSplineTangent.Y, MeshSplineTangent.X, 0.0f);
 
-		MeshLeftEdge = MeshSplinePoint - (MeshEdgeVector * (MeshWidth * (5.0f / 8.0f)));
+		MeshLeftEdge = MeshSplinePoint - (MeshEdgeVector * (MeshWidth * 0.5f));
 		FVector MeshEdge = MeshLeftEdge - FVector(0.0f, 0.0f, RiverDepth);
 
 		for (int32 y = 0; y < PathVertCount; y++)
@@ -304,42 +305,54 @@ void AProceduralLevelGenerator_CPP::NormalCalcs(TArray<FVector>& MeshVertices, T
 {
 	FVector CurrentVertex = MeshVertices[i];
 
-	FVector Edge1 = FVector::ZeroVector;
-	FVector Edge2 = FVector::ZeroVector;
+	bool bHasForwardPoint = i + MeshVertCount < MeshVertices.Num();
+	bool bHasBackwardPoint = i - MeshVertCount >= 0;
+	bool bHasRightPoint = (i + 1) % MeshVertCount != 0;
+	bool bHasLeftPoint = i % MeshVertCount != 0;
 
-	if ((i + 1) % MeshVertCount != 0)
+	FVector NormalSum = FVector::ZeroVector;
+	int NormalCount = 0;
+
+	if (bHasForwardPoint && bHasRightPoint)
 	{
-		FVector RightVertex = MeshVertices[i + 1];
-		Edge1 = RightVertex - CurrentVertex;
+		NormalSum += FVector::CrossProduct(MeshVertices[i + MeshVertCount] - CurrentVertex, MeshVertices[i + 1] - CurrentVertex);
+		NormalCount++;
+	}
+	if (bHasForwardPoint && bHasLeftPoint)
+	{
+		NormalSum += FVector::CrossProduct(MeshVertices[i + MeshVertCount] - CurrentVertex, CurrentVertex - MeshVertices[i - 1]);
+		NormalCount++;
+	}
+	if (bHasBackwardPoint && bHasRightPoint)
+	{
+		NormalSum += FVector::CrossProduct(CurrentVertex - MeshVertices[i - MeshVertCount], MeshVertices[i + 1] - CurrentVertex);
+		NormalCount++;
+	}
+	if (bHasBackwardPoint && bHasLeftPoint)
+	{
+		NormalSum += FVector::CrossProduct(CurrentVertex - MeshVertices[i - MeshVertCount], CurrentVertex - MeshVertices[i - 1]);
+		NormalCount++;
+	}
+
+	if (NormalCount > 0)
+	{
+		MeshNormals.Add(NormalSum.GetSafeNormal());
 	}
 	else
 	{
-		FVector RightVertex = MeshVertices[i - 1];
-		Edge1 = CurrentVertex - RightVertex;
+		MeshNormals.Add(FVector::UpVector);
 	}
-	if (i + MeshVertCount < MeshVertices.Num())
-	{
-		FVector ForwardVertex = MeshVertices[i + MeshVertCount];
-		Edge2 = ForwardVertex - CurrentVertex;
-	}
-	else
-	{
-		FVector ForwardVertex = MeshVertices[i - MeshVertCount];
-		Edge2 = CurrentVertex - ForwardVertex;
-	}
-	// Calculate the normal by taking the cross product
-	MeshNormals.Add(FVector::CrossProduct(Edge2, Edge1).GetSafeNormal());
 }
 
 void AProceduralLevelGenerator_CPP::UpdatePathMesh(USplineComponent* GuideSpline, UProceduralMeshComponent* ProcMesh, int MeshWidth, TArray<FVector>& MeshVertices,
-	TArray<FVector>& MeshNormals, TArray<FProcMeshTangent>& MeshTangents, TArray<int32>& MeshTriangles, int MeshUVScale, UMaterialInterface* MeshMaterial, int PathVerts)
+	TArray<FVector>& MeshNormals, TArray<FProcMeshTangent>& MeshTangents, TArray<int32>& MeshTriangles, UMaterialInterface* MeshMaterial, int PathVerts)
 {
 	MeshSplinePoint = GuideSpline->GetLocationAtSplinePoint(SplinePoints - 1, ESplineCoordinateSpace::Local);
 	MeshSplineTangent = GuideSpline->GetTangentAtSplinePoint(SplinePoints - 1, ESplineCoordinateSpace::Local).GetSafeNormal();
 
 	MeshEdgeVector = FVector(-MeshSplineTangent.Y, MeshSplineTangent.X, 0.0f);
 
-	MeshLeftEdge = MeshSplinePoint - (MeshEdgeVector * (MeshWidth * (5.0f / 8.0f)));
+	MeshLeftEdge = MeshSplinePoint - (MeshEdgeVector * (MeshWidth * 0.5f));
 	FVector MeshEdge = MeshLeftEdge - FVector(0.0f, 0.0f, RiverDepth);
 
 	for (int32 y = 0; y < PathVerts; y++)
@@ -348,7 +361,6 @@ void AProceduralLevelGenerator_CPP::UpdatePathMesh(USplineComponent* GuideSpline
 
 		MeshVertices.Add(MeshVert);
 		MeshTangents.Add(FProcMeshTangent(MeshSplineTangent, false));
-
 	}
 
 	for (int i = 0; i < PathVerts; i++)
@@ -385,8 +397,23 @@ FVector AProceduralLevelGenerator_CPP::PathMeshHelper(int y, int MeshWidth, FVec
 	else if (y < PathVertCount / 4)
 	{
 		float XYNoiseFactor = FMath::Lerp(0.3f, 1.0f, Falloff);
-		MeshVert.X += (NoiseValue * XYNoiseFactor) * NoiseAmplitude;
-		MeshVert.Y += (NoiseValue * XYNoiseFactor) * NoiseAmplitude;
+		float SmoothFactor = FMath::Pow(0.85f + 0.15f * FMath::Cos((y / (float)MoundVertCount) * PI), 2.5f);
+
+		if (MeshSplineTangent.X - MeshSplineTangent.Y > 0.2f)
+		{
+			MeshVert.X += (NoiseValue * XYNoiseFactor) * (NoiseAmplitude);
+			MeshVert.Y += (NoiseValue * XYNoiseFactor) * (50.0f) * SmoothFactor;
+		}
+		else if (MeshSplineTangent.Y - MeshSplineTangent.X > 0.2f)
+		{
+			MeshVert.X += (NoiseValue * XYNoiseFactor) * (50.0f) * SmoothFactor;
+			MeshVert.Y += (NoiseValue * XYNoiseFactor) * (NoiseAmplitude);
+		}
+		else
+		{
+			MeshVert.X += (NoiseValue * XYNoiseFactor) * (40.0f) * SmoothFactor;
+			MeshVert.Y += (NoiseValue * XYNoiseFactor) * (40.0f) * SmoothFactor;
+		}
 		MeshVert.Z += (depthOffset * y);
 	}
 	else if (y == PathVertCount / 4)
@@ -397,30 +424,48 @@ FVector AProceduralLevelGenerator_CPP::PathMeshHelper(int y, int MeshWidth, FVec
 		Falloff = 1.0f - FMath::Pow(FMath::Abs(NoiseValue), 2.0f);
 		MeshVert.Z = (NoiseValue * Falloff) * NoiseAmplitude;
 	}
-	else if (y < PathVertCount - 1)
+	else if (y > PathVertCount / 4 && y < PathVertCount - (PathVertCount / 4))
 	{
+		Falloff = 1.0f - FMath::Pow(FMath::Abs(NoiseValue), 2.0f);
+		MeshVert.Z = (NoiseValue * Falloff) * NoiseAmplitude;
+	}
+	else if (y == PathVertCount - (PathVertCount / 4) - 1)
+	{ 
+		float XYNoiseFactor = FMath::Lerp(0.3f, 1.0f, Falloff);
+		MeshVert.X += (NoiseValue * XYNoiseFactor) * NoiseAmplitude;
+		MeshVert.Y += (NoiseValue * XYNoiseFactor) * NoiseAmplitude;
 		Falloff = 1.0f - FMath::Pow(FMath::Abs(NoiseValue), 2.0f);
 		MeshVert.Z = (NoiseValue * Falloff) * NoiseAmplitude;
 	}
 	else
 	{
-		MeshVert = MeshLeftEdge + (MeshEdgeVector * offsetCalc);
-		MeshVert.Z = -RiverDepth * 1.4f;
+		float XYNoiseFactor = FMath::Lerp(0.3f, 1.0f, Falloff);
+		MeshVert.X += (NoiseValue * XYNoiseFactor) * NoiseAmplitude;
+		MeshVert.Y += (NoiseValue * XYNoiseFactor) * NoiseAmplitude;
+		MeshVert.Z += (depthOffset * ((PathVertCount - 1) - y));
 	}
 	RiverSpline->UpdateSpline();
 	return MeshVert;
 }
 
 void AProceduralLevelGenerator_CPP::GenerateRiverMesh(USplineComponent* GuideSpline, UProceduralMeshComponent* ProcMesh, int MeshWidth, TArray<FVector>& MeshVertices,
-	TArray<FVector>& MeshNormals, TArray<FProcMeshTangent>& MeshTangents, TArray<int32>& MeshTriangles, int MeshUVScale, UMaterialInterface* MeshMaterial, int RiverVerts)
+	TArray<FVector>& MeshNormals, TArray<FProcMeshTangent>& MeshTangents, TArray<int32>& MeshTriangles, UMaterialInterface* MeshMaterial, int RiverVerts)
 {
 	for (int32 i = 0; i < SplinePoints; i++)
 	{
 		MeshSplinePoint = GuideSpline->GetLocationAtSplinePoint(i, ESplineCoordinateSpace::Local);
 		MeshSplineTangent = GuideSpline->GetTangentAtSplinePoint(i, ESplineCoordinateSpace::Local).GetSafeNormal();
-		
-		float VertColourR = (MeshSplineTangent.X + 1.0f) * 0.5f;
-		float VertColourG = (MeshSplineTangent.Y + 1.0f) * 0.5f;
+
+		FProcMeshTangent MeshTangent = FProcMeshTangent(MeshSplineTangent, false);
+		FVector TangentX = MeshTangent.TangentX.GetSafeNormal();
+		if (TangentX.X < 0.0f)
+		{
+			TangentX.X = -TangentX.X;
+		}
+		if (TangentX.Y < 0.0f)
+		{
+			TangentX.Y = -TangentX.Y;
+		}
 
 		MeshEdgeVector = FVector(-MeshSplineTangent.Y, MeshSplineTangent.X, 0.0f);
 
@@ -437,8 +482,9 @@ void AProceduralLevelGenerator_CPP::GenerateRiverMesh(USplineComponent* GuideSpl
 			MeshVert.Z += 10.0f;
 
 			MeshVertices.Add(MeshVert);
-			MeshTangents.Add(FProcMeshTangent(MeshSplineTangent, false));
-			VertexColours.Add(FLinearColor(-VertColourR, VertColourG, 0.5f, 1.0f));
+
+			MeshTangents.Add(MeshTangent);
+			VertexColours.Add(FLinearColor(TangentX.X, TangentX.Y, 0.5f, 1.0f));
 		}
 
 	}
@@ -453,7 +499,6 @@ void AProceduralLevelGenerator_CPP::GenerateRiverMesh(USplineComponent* GuideSpl
 		}
 		NormalCalcs(MeshVertices, MeshNormals, RiverVerts, i);
 	}
-
 	ProcMesh->CreateMeshSection_LinearColor(0, MeshVertices, MeshTriangles, MeshNormals, TArray<FVector2D>(), VertexColours, MeshTangents, true, false);
 
 	// Set the material
@@ -464,13 +509,21 @@ void AProceduralLevelGenerator_CPP::GenerateRiverMesh(USplineComponent* GuideSpl
 }
 
 void AProceduralLevelGenerator_CPP::UpdateRiverMesh(USplineComponent* GuideSpline, UProceduralMeshComponent* ProcMesh, int MeshWidth, TArray<FVector>& MeshVertices,
-	TArray<FVector>& MeshNormals, TArray<FProcMeshTangent>& MeshTangents, TArray<int32>& MeshTriangles, int MeshUVScale, UMaterialInterface* MeshMaterial, int RiverVerts)
+	TArray<FVector>& MeshNormals, TArray<FProcMeshTangent>& MeshTangents, TArray<int32>& MeshTriangles, UMaterialInterface* MeshMaterial, int RiverVerts)
 {
 	MeshSplinePoint = GuideSpline->GetLocationAtSplinePoint(SplinePoints - 1, ESplineCoordinateSpace::Local);
 	MeshSplineTangent = GuideSpline->GetTangentAtSplinePoint(SplinePoints - 1, ESplineCoordinateSpace::Local).GetSafeNormal();
-	float VertColourR = (MeshSplineTangent.X + 1.0f) * 0.5f;
-	float VertColourG = (MeshSplineTangent.Y + 1.0f) * 0.5f;
 
+	FProcMeshTangent MeshTangent = FProcMeshTangent(MeshSplineTangent, false);
+	FVector TangentX = MeshTangent.TangentX.GetSafeNormal();
+	if (TangentX.X < 0.0f)
+	{
+		TangentX.X = -TangentX.X;
+	}
+	if (TangentX.Y < 0.0f)
+	{
+		TangentX.Y = -TangentX.Y;
+	}
 	MeshEdgeVector = FVector(-MeshSplineTangent.Y, MeshSplineTangent.X, 0.0f);
 
 	MeshLeftEdge = MeshSplinePoint - (MeshEdgeVector * (MeshWidth / 1.8f));
@@ -496,16 +549,16 @@ void AProceduralLevelGenerator_CPP::UpdateRiverMesh(USplineComponent* GuideSplin
 		MeshVert.Z += 10.0f;
 
 		MeshVertices.Add(MeshVert);
-		MeshTangents.Add(FProcMeshTangent(MeshSplineTangent, false));
 
-		VertexColours.Add(FLinearColor(-VertColourR, VertColourG, 0.5f, 1.0f));
+		MeshTangents.Add(MeshTangent);
+		VertexColours.Add(FLinearColor(TangentX.X, TangentX.Y, 0.5f, 1.0f));
 	}
 
 	for (int i = 0; i < RiverVerts; i++)
 	{
 		NormalCalcs(MeshVertices, MeshNormals, RiverVerts, (MeshVertices.Num() - RiverVerts) + i);
 	}
-	ProcMesh->CreateMeshSection_LinearColor(0, MeshVertices, MeshTriangles, MeshNormals, TArray<FVector2D>(), VertexColours, MeshTangents, true, false);
+	ProcMesh->CreateMeshSection_LinearColor(0, MeshVertices, MeshTriangles, MeshNormals, TArray<FVector2D>(), VertexColours, MeshTangents, false, false);
 }
 
 void AProceduralLevelGenerator_CPP::SplineRegulator(USplineComponent* GuideSpline)
@@ -534,7 +587,7 @@ void AProceduralLevelGenerator_CPP::SplineRegulator(USplineComponent* GuideSplin
 }
 
 void AProceduralLevelGenerator_CPP::GenerateMoundMesh(USplineComponent* GuideSpline, UProceduralMeshComponent* ProcMesh, int MeshWidth, TArray<FVector>& MeshVertices,
-	TArray<FVector>& MeshNormals, TArray<FProcMeshTangent>& MeshTangents, TArray<int32>& MeshTriangles, int MeshUVScale, UMaterialInterface* MeshMaterial, int MoundVerts)
+	TArray<FVector>& MeshNormals, TArray<FProcMeshTangent>& MeshTangents, TArray<int32>& MeshTriangles, UMaterialInterface* MeshMaterial, int MoundVerts)
 {
 	for (int32 i = 0; i < SplinePoints; i++)
 	{
@@ -544,13 +597,23 @@ void AProceduralLevelGenerator_CPP::GenerateMoundMesh(USplineComponent* GuideSpl
 		MeshEdgeVector = FVector(-MeshSplineTangent.Y, MeshSplineTangent.X, 0.0f);
 
 		MeshLeftEdge = MeshSplinePoint - (MeshEdgeVector * MeshWidth / 2.0f);
+
 		float zValue = zHeight;
-		int valueting = MoundVertCount * 0.75f;
-		float zOffset = zHeight / valueting;
+		int verts75 = MoundVerts * 0.75f;
+		int verts25 = MoundVerts - verts75;
+		float zOffset75 = zHeight / verts75 + 1;
+		float zOffset25 = zOffset75 / verts25;
 
 		for (int32 y = 0; y < MoundVertCount; y++)
 		{
-			MeshVert = MoundMeshHelper(y, MeshWidth, zValue, zOffset, i);
+			if (y < MoundVerts * 0.25f)
+			{
+				MeshVert = MoundMeshHelper(y, MeshWidth, zValue, zOffset25, SplinePoints - 1);
+			}
+			else
+			{
+				MeshVert = MoundMeshHelper(y, MeshWidth, zValue, zOffset75, SplinePoints - 1);
+			}
 
 			MeshVertices.Add(MeshVert);
 			MeshTangents.Add(FProcMeshTangent(MeshSplineTangent, false));
@@ -576,7 +639,7 @@ void AProceduralLevelGenerator_CPP::GenerateMoundMesh(USplineComponent* GuideSpl
 }
 
 void AProceduralLevelGenerator_CPP::UpdateMoundMesh(USplineComponent* GuideSpline, UProceduralMeshComponent* ProcMesh, int MeshWidth, TArray<FVector>& MeshVertices,
-	TArray<FVector>& MeshNormals, TArray<FProcMeshTangent>& MeshTangents, TArray<int32>& MeshTriangles, int MeshUVScale, UMaterialInterface* MeshMaterial, int MoundVerts)
+	TArray<FVector>& MeshNormals, TArray<FProcMeshTangent>& MeshTangents, TArray<int32>& MeshTriangles, UMaterialInterface* MeshMaterial, int MoundVerts)
 {
 	SplineRegulator(GuideSpline);
 
@@ -601,13 +664,21 @@ void AProceduralLevelGenerator_CPP::UpdateMoundMesh(USplineComponent* GuideSplin
 	MeshLeftEdge = MeshSplinePoint - (MeshEdgeVector * MeshWidth / 2.0f);
 
 	float zValue = zHeight;
-	int valueting = MoundVertCount * 0.75f;
-	float zOffset = zHeight / valueting;
+	int verts75 = MoundVerts * 0.75f;
+	int verts25 = MoundVerts - verts75;
+	float zOffset75 = zHeight / verts75 + 1;
+	float zOffset25 = zOffset75 / verts25;
 
-	for (int32 y = 0; y < MoundVerts; y++)
+	for (int32 y = 0; y < MoundVertCount; y++)
 	{
-		MeshVert = MoundMeshHelper(y, MeshWidth, zValue, zOffset, SplinePoints - 1);
-
+		if (y < MoundVerts * 0.25f)
+		{
+			MeshVert = MoundMeshHelper(y, MeshWidth, zValue, zOffset25, SplinePoints - 1);
+		}
+		else
+		{
+			MeshVert = MoundMeshHelper(y, MeshWidth, zValue, zOffset75, SplinePoints - 1);
+		}
 		MeshVertices.Add(MeshVert);
 		MeshTangents.Add(FProcMeshTangent(MeshSplineTangent, false));
 	}
@@ -621,7 +692,7 @@ void AProceduralLevelGenerator_CPP::UpdateMoundMesh(USplineComponent* GuideSplin
 
 FVector AProceduralLevelGenerator_CPP::MoundMeshHelper(int y, int MeshWidth, float& zValue, float zOffset, int i)
 {
-	offsetCalc = FVector::Dist(MeshLeftEdge, MeshSplinePoint) / ((MoundVertCount - 1.0f) / 1.75f) * y;
+	offsetCalc = FVector::Dist(MeshLeftEdge, MeshSplinePoint) / ((MoundVertCount - 1.0f) / 2.0f) * y;
 	MeshVert = MeshLeftEdge + (MeshEdgeVector * offsetCalc) + FVector(0.0f, 0.0f, zValue);
 
 	NoiseValue = Noise.GetNoise(MeshVert.X, MeshVert.Y);
@@ -630,9 +701,9 @@ FVector AProceduralLevelGenerator_CPP::MoundMeshHelper(int y, int MeshWidth, flo
 	if (y < MoundVertCount * 0.25f)
 	{
 		float SmoothFactor = 0.5f + 0.5f * FMath::Cos((y / (float)MoundVertCount) * PI);
-		MeshVert.Z += (NoiseValue * Falloff) * NoiseAmplitude * SmoothFactor;
+		MeshVert.Z += (NoiseValue * Falloff) * 30.0f * SmoothFactor;
 
-		zValue -= (zOffset / (MoundVertCount * 0.25f));
+		zValue -= zOffset;
 	}
 	else if (y == MoundVertCount * 0.25f)
 	{
@@ -645,11 +716,26 @@ FVector AProceduralLevelGenerator_CPP::MoundMeshHelper(int y, int MeshWidth, flo
 
 		zValue -= zOffset;
 	}
-	else if (y > MoundVertCount * 0.25f && y < MoundVertCount)
+	else 
 	{
 		float XYNoiseFactor = FMath::Lerp(0.3f, 1.0f, Falloff);
-		MeshVert.X += (NoiseValue * XYNoiseFactor) * (NoiseAmplitude);
-		MeshVert.Y += (NoiseValue * XYNoiseFactor) * (NoiseAmplitude);
+		float SmoothFactor = FMath::Pow(0.85f + 0.15f * FMath::Cos((y / (float)MoundVertCount) * PI), 2.5f);
+
+		if (MeshSplineTangent.X - MeshSplineTangent.Y > 0.2f)
+		{
+			MeshVert.X += (NoiseValue * XYNoiseFactor) * (NoiseAmplitude);
+			MeshVert.Y += (NoiseValue * XYNoiseFactor) * (50.0f) * SmoothFactor;
+		}
+		else if (MeshSplineTangent.Y - MeshSplineTangent.X > 0.2f)
+		{
+			MeshVert.X += (NoiseValue * XYNoiseFactor) * (50.0f) * SmoothFactor;
+			MeshVert.Y += (NoiseValue * XYNoiseFactor) * (NoiseAmplitude);
+		}
+		else
+		{
+			MeshVert.X += (NoiseValue * XYNoiseFactor) * (40.0f) * SmoothFactor;
+			MeshVert.Y += (NoiseValue * XYNoiseFactor) * (40.0f) * SmoothFactor;
+		}
 
 		zValue -= zOffset;
 	}
