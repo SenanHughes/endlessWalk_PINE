@@ -11,8 +11,39 @@
 #include "FastNoiseLite.h"
 #include "DataHelper.generated.h"
 
+
 USTRUCT(BlueprintType)
-struct FPathData
+struct FSplineConfigData
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere)
+	int SplinePoints = 200;
+	UPROPERTY(EditAnywhere)
+	int PlaneDistance = 100;
+};
+
+USTRUCT(BlueprintType)
+struct FNoiseConfigData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere)
+	float NoiseFrequency = 0.1f;
+	UPROPERTY(EditAnywhere)
+	float NoiseAmplitude = 15.0f;
+};
+
+struct FNoiseDynamicData
+{
+	FastNoiseLite Noise;
+	float Falloff = 0.0f;
+	float SharpnessMultiplier = 50.0f;
+	float FrequencyMultiplier = 0.003f;
+};
+
+USTRUCT(BlueprintType)
+struct FPathConfigData
 {
 	GENERATED_BODY()
 
@@ -21,7 +52,11 @@ struct FPathData
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int PathVertCount = 12;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	int PathWidth = 600;
+	float PathWidth = 600;
+};
+
+struct FPathDynamicData
+{
 	UPROPERTY()
 	USplineComponent* PathSpline;
 	UPROPERTY()
@@ -30,23 +65,28 @@ struct FPathData
 	TArray<FVector> PathNormals = TArray<FVector>();
 	TArray<FProcMeshTangent> PathTangents = TArray<FProcMeshTangent>();
 	TArray<int32> PathTriangles = TArray<int32>();
+	int DepthOffset = 0;
 };
 
 USTRUCT(BlueprintType)
-struct FRiverData
+struct FRiverConfigData
 {
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UMaterialInterface* RiverMaterial = nullptr;
-	UPROPERTY()
-	UMaterialInstanceDynamic* DynamicRiverMaterial = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int RiverVertCount = 2;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	int RiverWidth = 600;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	int RiverDepth = 100;
+};
+
+struct FRiverDynamicData
+{
+	UPROPERTY()
+	UMaterialInstanceDynamic* DynamicRiverMaterial = nullptr;
 	UPROPERTY()
 	USplineComponent* RiverSpline;
 	UPROPERTY()
@@ -59,7 +99,7 @@ struct FRiverData
 };
 
 USTRUCT(BlueprintType)
-struct FMoundData
+struct FMoundConfigData
 {
 	GENERATED_BODY()
 
@@ -69,6 +109,11 @@ struct FMoundData
 	int MoundVertCount = 12;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	int MoundWidth = 600;
+	float MoundHeight = 600.0f;
+};
+
+struct FMoundDynamicData
+{
 	UPROPERTY()
 	USplineComponent* MoundSpline;
 	UPROPERTY()
@@ -77,16 +122,17 @@ struct FMoundData
 	TArray<FVector> MoundNormals = TArray<FVector>();
 	TArray<FProcMeshTangent> MoundTangents = TArray<FProcMeshTangent>();
 	TArray<int32> MoundTriangles = TArray<int32>();
-	float MoundHeight = 600.0f;
+
+	int verts75 = 0;
+	int verts25 = 0;
+	float zOffset75 = 0.0f;
+	float zOffset25 = 0.0f;
 };
 
 USTRUCT(BlueprintType)
-struct FWallData
+struct FWallConfigData
 {
 	GENERATED_BODY()
-
-	UPROPERTY()
-	USplineComponent* WallSpline;
 	UPROPERTY(EditAnywhere)
 	UStaticMesh* WallMesh1 = nullptr;
 
@@ -94,8 +140,22 @@ struct FWallData
 	UStaticMesh* WallMesh2 = nullptr;
 };
 
+struct FWallDynamicData
+{
+	UPROPERTY()
+	USplineComponent* WallSpline;
+	TArray<USplineMeshComponent*> SplineMeshComponents;
+	FVector SegmentStartLocation = FVector::ZeroVector;
+	FVector SegmentEndLocation = FVector::ZeroVector;
+	float MeshLength = 0.0f;
+	float StartDistance = 0.0f;
+	float EndDistance = 0.0f;
+	int32 WallCounter = 0;
+	int32 SplinePointCount = 0;
+};
+	
 USTRUCT(BlueprintType)
-struct FPlantData
+struct FPlantConfigData
 {
 	GENERATED_BODY()
 
@@ -103,36 +163,15 @@ struct FPlantData
 	UStaticMesh* PlantMesh = nullptr;
 	UPROPERTY(EditAnywhere)
 	UStaticMesh* PlantMesh2 = nullptr;
+
+};
+
+struct FPlantDynamicData
+{
 	UPROPERTY()
 	UHierarchicalInstancedStaticMeshComponent* PlantInstance = nullptr;
-	UPROPERTY()
-	UHierarchicalInstancedStaticMeshComponent* PlantInstance2 = nullptr;
-};
-
-USTRUCT(BlueprintType)
-struct FNoiseData
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere)
-	float NoiseFrequency = 0.1f;
-	UPROPERTY(EditAnywhere)
-	float NoiseAmplitude = 15.0f;
-	float Falloff = 0.0f;
-	float SharpnessMultiplier = 50.0f;
-	float FrequencyMultiplier = 0.003f;
-
-	FastNoiseLite Noise;
-};
-
-USTRUCT(BlueprintType)
-struct FSplineData
-{
-	GENERATED_BODY()
-	
-	UPROPERTY(EditAnywhere)
-	int SplinePoints = 200;
-	UPROPERTY(EditAnywhere)
-	int PlaneDistance = 100;
+	TArray<FVector> ValidSpawnPoints;
+	int32 InstanceCount;
+	int32 LogicalStart;
 };
 

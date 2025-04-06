@@ -5,15 +5,12 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Components/SphereComponent.h"
-#include "Components/SplineComponent.h"
-#include "Components/SplineMeshComponent.h"
-#include "Components/HierarchicalInstancedStaticMeshComponent.h"
-#include "Engine/StaticMeshActor.h"
-#include "KismetProceduralMeshLibrary.h"
-#include "ProceduralMeshComponent.h"
-#include "Components/FastNoiseLite.h"
-//#include "Components/ProcMeshGeneration_CPP.h"
 #include "Components/DataHelper.h"
+#include "Components/MeshHelperFuncs_CPP.h"
+#include "Components/ProcMeshGeneration_CPP.h"
+#include "Components/SpawnAssets_CPP.h"
+#include "Components/ProcMeshUpdates_CPP.h"
+#include "Components/UpdateAssets_CPP.h"
 #include "ProceduralLevelGenerator_CPP.generated.h"
 
 UCLASS()
@@ -22,7 +19,7 @@ class ENDLESSWALK_API AProceduralLevelGenerator_CPP : public AActor
 	GENERATED_BODY()
 
 public:
-	AProceduralLevelGenerator_CPP();
+	AProceduralLevelGenerator_CPP(const FObjectInitializer& ObjectInitializer);
 
 	//** Sphere Trigger */
 	UPROPERTY()
@@ -33,30 +30,34 @@ public:
 	APawn* CharacterPawn;
 
 	//** Data Helper Variables */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Settings")
-	FPathData PathData;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Settings")
-	FRiverData RiverData;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Settings")
-	FMoundData MoundData;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Settings")
-	FSplineData SplineData;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Settings")
-	FWallData WallData;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Settings")
-	FNoiseData NoiseData;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Settings")
-	FPlantData PlantData;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Settings", meta = (DisplayName = "Spline Parameters"))
+	FSplineConfigData SplineConfigData;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Settings", meta = (DisplayName = "Noise Parameters"))
+	FNoiseConfigData NoiseConfigData;
+	FNoiseDynamicData NoiseDynamicData;
 
-	/** Static Mesh to Spawn
-	UPROPERTY(EditAnywhere, Category = "03 ProceduralAssets | Walls")
-	UStaticMesh* WallMesh1 = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Settings", meta = (DisplayName = "Path Parameters"))
+	FPathConfigData PathConfigData;
+	FPathDynamicData PathDynamicData;
 
-	UPROPERTY(EditAnywhere, Category = "03 ProceduralAssets | Walls")
-	UStaticMesh* WallMesh2 = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Settings", meta = (DisplayName = "River Parameters"))
+	FRiverConfigData RiverConfigData;
+	FRiverDynamicData RiverDynamicData;
 
-	UPROPERTY(EditAnywhere, Category = "03 ProceduralAssets | Plants")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Settings", meta = (DisplayName = "Mound Parameters"))
+	FMoundConfigData MoundConfigData;
+	FMoundDynamicData MoundDynamicData;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Settings", meta = (DisplayName = "Wall Parameters"))
+	FWallConfigData WallConfigData;
+	FWallDynamicData WallDynamicData;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Settings", meta = (DisplayName = "Plant Parameters"))
+	FPlantConfigData PlantConfigData;
+	FPlantDynamicData PlantDynamicData;
+
+	/**UPROPERTY(EditAnywhere, Category = "03 ProceduralAssets | Plants")
 	UStaticMesh* PlantMesh = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = "03 ProceduralAssets | Plants")
@@ -79,23 +80,13 @@ public:
 
 
 	//** Plant Asset Variables 
-	UPROPERTY()
+	/**UPROPERTY()
 	UHierarchicalInstancedStaticMeshComponent* PlantInstance = nullptr;
 
 	UPROPERTY()
-	UHierarchicalInstancedStaticMeshComponent* PlantInstance2 = nullptr;
+	UHierarchicalInstancedStaticMeshComponent* PlantInstance2 = nullptr;*/
 
 
-
-	// Wall SplineMesh Variables
-	TArray<USplineMeshComponent*> SplineMeshComponents;
-	FVector SegmentStartLocation = FVector::ZeroVector;
-	FVector SegmentEndLocation = FVector::ZeroVector;
-	float MeshLength = 0.0f;
-	float StartDistance = 0.0f;
-	float EndDistance = 0.0f;
-	int32 WallCounter = 0;
-	int32 SplinePointCount = 0;
 
 
 	// Spline Containment Variables
@@ -111,13 +102,7 @@ public:
 	float offsetCalc = 0.0f;
 	float depthOffset = 0.0f;
 
-	// Generic uProcMesh Variables
-	FVector MeshVert = FVector::ZeroVector;
-	FVector MeshLeftEdge = FVector::ZeroVector;
-	FVector MeshSplinePoint = FVector::ZeroVector;
-	FVector MeshSplineTangent = FVector::ZeroVector;
-	FVector MeshEdgeVector = FVector::ZeroVector;
-
+	AssetHelperFuncs AssetHelper;
 
 protected:
 	// Called when the game starts or when spawned
@@ -127,40 +112,22 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	bool IsPointInsideSphere(FVector Point, FVector SphereCenter, float SphereRadius);
+
 	void LimitMovementSmoothly(USplineComponent* GuideSpline, float MaxDistance, float PullSpeed);
 
 	void UpdateTerrainSpline();
 
-	void TriangleCalcs(TArray<FVector>& MeshVertices, TArray<int32>& MeshTriangles, int MeshVertCount, int i);
+	UProcMeshGeneration_CPP* MeshGeneration;
+	UProcMeshUpdates_CPP* MeshUpdates;
 
-	void NormalCalcs(TArray<FVector>& MeshVertices, TArray<FVector>& MeshNormals, int MeshVertCount, int i);
+	USpawnAssets_CPP* SpawnAssets;
+	UUpdateAssets_CPP* UpdateAssets;
 
-	bool IsPointInsideSphere(FVector Point, FVector SphereCenter, float SphereRadius);
+	//void UpdateWall(USplineComponent* GuideSpline);
 
-	void SplineRegulator(USplineComponent* GuideSpline);
-
-	FVector PathMeshHelper(int y, int MeshWidth, FVector& MeshEdge);
-
-	FVector MoundMeshHelper(int y, int MeshWidth, float& zValue, float zOffset, int i);
-
-	void GeneratePathMesh(const FPathData& PathDataStruct);
-
-	void UpdatePathMesh(const FPathData& PathDataStruct);
-
-	void GenerateRiverMesh(const FRiverData& RiverDataStruct);
-
-	void UpdateRiverMesh(const FRiverData& RiverDataStruct);
-
-	void GenerateMoundMesh(const FMoundData& MoundDataStruct);
-
-	void UpdateMoundMesh(const FMoundData& MoundDataStruct);
-
-	void SpawnWall(USplineComponent* GuideSpline);
-
-	void UpdateWall(USplineComponent* GuideSpline);
-
-	TArray<FVector> GetValidSpawnPoints(UProceduralMeshComponent* Mesh, USplineComponent* GuideSpline);
+	/**TArray<FVector> GetValidSpawnPoints(UProceduralMeshComponent* Mesh, USplineComponent* GuideSpline);
 	void SpawnAssetInstances(UHierarchicalInstancedStaticMeshComponent* HISM, const TArray<FVector>& SpawnPoints, UProceduralMeshComponent* Mesh, int ClusterSizeMin, int ClusterSizeMax);
 	FVector InterpolateHeight(const FVector& Point, UProceduralMeshComponent* Mesh);
-	bool PointInTriangle2D(const FVector2D& P, const FVector2D& A, const FVector2D& B, const FVector2D& C);	
+	bool PointInTriangle2D(const FVector2D& P, const FVector2D& A, const FVector2D& B, const FVector2D& C);*/	
 };
