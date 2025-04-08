@@ -13,8 +13,8 @@ TArray<FVector> AssetHelperFuncs::GetValidSpawnPoints(UProceduralMeshComponent* 
 
 		if (SlopeAngle > 25.0f && Vertex.Position.Z != Section->SectionLocalBox.Min.Z)
 		{
-			FVector ClosestSplinePoint = GuideSpline->FindLocationClosestToWorldLocation(Vertex.Position, ESplineCoordinateSpace::World);
-			FVector RightVector = GuideSpline->GetRightVectorAtSplinePoint(ClosestSplinePoint.X, ESplineCoordinateSpace::World);
+			FVector ClosestSplinePoint = GuideSpline->FindLocationClosestToWorldLocation(Vertex.Position, ESplineCoordinateSpace::Local);
+			FVector RightVector = GuideSpline->GetRightVectorAtSplinePoint(ClosestSplinePoint.X, ESplineCoordinateSpace::Local);
 			FVector ToPoint = Vertex.Position - ClosestSplinePoint;
 
 			if (FVector::DotProduct(ToPoint, RightVector) < 0.0f)

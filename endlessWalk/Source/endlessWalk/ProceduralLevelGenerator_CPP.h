@@ -5,12 +5,13 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Components/SphereComponent.h"
-#include "Components/DataHelper.h"
-#include "Components/MeshHelperFuncs_CPP.h"
-#include "Components/ProcMeshGeneration_CPP.h"
-#include "Components/SpawnAssets_CPP.h"
-#include "Components/ProcMeshUpdates_CPP.h"
-#include "Components/UpdateAssets_CPP.h"
+#include "Components/SplineComponent.h"
+#include "Components/SplineMeshComponent.h"
+#include "Components/HierarchicalInstancedStaticMeshComponent.h"
+#include "Engine/StaticMeshActor.h"
+#include "KismetProceduralMeshLibrary.h"
+#include "ProceduralMeshComponent.h"
+#include "Components/FastNoiseLite.h"
 #include "ProceduralLevelGenerator_CPP.generated.h"
 
 UCLASS()
@@ -19,74 +20,148 @@ class ENDLESSWALK_API AProceduralLevelGenerator_CPP : public AActor
 	GENERATED_BODY()
 
 public:
-	AProceduralLevelGenerator_CPP(const FObjectInitializer& ObjectInitializer);
-
-	//** Sphere Trigger */
-	UPROPERTY()
-	USphereComponent* SphereTrigger;
+	AProceduralLevelGenerator_CPP();
 
 	//** Character Variables for Direction Containment */
 	FVector CharacterLocation = FVector::ZeroVector;
 	APawn* CharacterPawn;
 
-	//** Data Helper Variables */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Settings", meta = (DisplayName = "Spline Parameters"))
-	FSplineConfigData SplineConfigData;
+	//** Initialising FastNoiseLite Call */
+	FastNoiseLite Noise;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Settings", meta = (DisplayName = "Noise Parameters"))
-	FNoiseConfigData NoiseConfigData;
-	FNoiseDynamicData NoiseDynamicData;
+	//** Sphere Trigger */
+	UPROPERTY()
+	USphereComponent* SphereTrigger;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Settings", meta = (DisplayName = "Path Parameters"))
-	FPathConfigData PathConfigData;
-	FPathDynamicData PathDynamicData;
+	//** Path Variables */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "01 Materials")
+	UMaterialInterface* PathMaterial = nullptr;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Settings", meta = (DisplayName = "River Parameters"))
-	FRiverConfigData RiverConfigData;
-	FRiverDynamicData RiverDynamicData;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "02 ProceduralMeshes | Path")
+	int PathVertCount = 12;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Settings", meta = (DisplayName = "Mound Parameters"))
-	FMoundConfigData MoundConfigData;
-	FMoundDynamicData MoundDynamicData;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "02 ProceduralMeshes | Path")
+	int PathWidth = 600;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Settings", meta = (DisplayName = "Wall Parameters"))
-	FWallConfigData WallConfigData;
-	FWallDynamicData WallDynamicData;
+	UPROPERTY()
+	USplineComponent* PathSpline;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Settings", meta = (DisplayName = "Plant Parameters"))
-	FPlantConfigData PlantConfigData;
-	FPlantDynamicData PlantDynamicData;
+	UPROPERTY()
+	UProceduralMeshComponent* PathMesh;
 
-	/**UPROPERTY(EditAnywhere, Category = "03 ProceduralAssets | Plants")
+
+	//** Wall Variables */
+	UPROPERTY()
+	USplineComponent* WallSpline;
+
+
+	//** River Variables */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "01 Materials")
+	UMaterialInterface* RiverMaterial = nullptr;
+	
+	UPROPERTY()
+	UMaterialInstanceDynamic* DynamicRiverMaterial;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "02 ProceduralMeshes | River")
+	int RiverVertCount = 2;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "02 ProceduralMeshes | River")
+	int RiverWidth = 600;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "02 ProceduralMeshes | River")
+	int RiverDepth = 100;
+
+	//UPROPERTY();
+
+	UPROPERTY()
+	USplineComponent* RiverSpline;
+
+	UPROPERTY()
+	UProceduralMeshComponent* RiverMesh;
+
+
+	//** Mound Variables */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "01 Materials")
+	UMaterialInterface* MoundMaterial = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "02 ProceduralMeshes | Mound")
+	int MoundVertCount = 12;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "02 ProceduralMeshes | Mound")
+	int MoundWidth = 600;
+
+	UPROPERTY()
+	USplineComponent* MoundSpline;
+
+	UPROPERTY()
+	UProceduralMeshComponent* MoundMesh;
+
+
+
+	////** Mesh Spline Variables */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "02 ProceduralMeshes | MeshSegments")
+	int SplinePoints = 200;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "02 ProceduralMeshes | MeshSegments")
+	int PlaneDistance = 100;
+
+
+	///** Static Mesh to Spawn */
+	UPROPERTY(EditAnywhere, Category = "03 ProceduralAssets | Walls")
+	UStaticMesh* WallMesh1 = nullptr;
+
+	UPROPERTY(EditAnywhere, Category = "03 ProceduralAssets | Walls")
+	UStaticMesh* WallMesh2 = nullptr;
+
+	UPROPERTY(EditAnywhere, Category = "03 ProceduralAssets | Plants")
 	UStaticMesh* PlantMesh = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = "03 ProceduralAssets | Plants")
-	UStaticMesh* PlantMesh2 = nullptr;*/
+	UStaticMesh* PlantMesh2 = nullptr;
 
 
 
 
-	//UPROPERTY(EditAnywhere, Category = "03 ProceduralAssets | Misc")
-	//UStaticMesh* AssetToSpawn5 = nullptr;
+	UPROPERTY(EditAnywhere, Category = "03 ProceduralAssets | Misc")
+	UStaticMesh* AssetToSpawn5 = nullptr;
 
-	//UPROPERTY(EditAnywhere, Category = "03 ProceduralAssets | Misc")
-	//UStaticMesh* AssetToSpawn6 = nullptr;
+	UPROPERTY(EditAnywhere, Category = "03 ProceduralAssets | Misc")
+	UStaticMesh* AssetToSpawn6 = nullptr;
 
-	//UPROPERTY(EditAnywhere, Category = "03 ProceduralAssets | Misc")
-	//UStaticMesh* AssetToSpawn7 = nullptr;
+	UPROPERTY(EditAnywhere, Category = "03 ProceduralAssets | Misc")
+	UStaticMesh* AssetToSpawn7 = nullptr;
 
-	//UPROPERTY(EditAnywhere, Category = "03 ProceduralAssets | Misc")
-	//UStaticMesh* AssetToSpawn8 = nullptr;
+	UPROPERTY(EditAnywhere, Category = "03 ProceduralAssets | Misc")
+	UStaticMesh* AssetToSpawn8 = nullptr;
+
+
+	//** Noise Variables 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "04 Noise")
+	float NoiseFrequency = 0.1f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "04 Noise")
+	float NoiseAmplitude = 15.0f;
+
 
 
 	//** Plant Asset Variables 
-	/**UPROPERTY()
+	UPROPERTY()
 	UHierarchicalInstancedStaticMeshComponent* PlantInstance = nullptr;
 
 	UPROPERTY()
-	UHierarchicalInstancedStaticMeshComponent* PlantInstance2 = nullptr;*/
+	UHierarchicalInstancedStaticMeshComponent* PlantInstance2 = nullptr;
 
 
+
+	// Wall SplineMesh Variables
+	TArray<USplineMeshComponent*> SplineMeshComponents;
+	FVector SegmentStartLocation = FVector::ZeroVector;
+	FVector SegmentEndLocation = FVector::ZeroVector;
+	float MeshLength = 0.0f;
+	float StartDistance = 0.0f;
+	float EndDistance = 0.0f;
+	int32 WallCounter = 0;
+	int32 SplinePointCount = 0;
 
 
 	// Spline Containment Variables
@@ -96,13 +171,47 @@ public:
 	float EdgeThreshold = 0.0f;
 	float PointCount = 0;
 	bool ChangeCurve = false;
+	bool AvoidingEdge = false;
 	bool validPoint = false;
+
+	// Path uProcMesh Variables
+	TArray<FVector> PathVertices = TArray<FVector>();
+	TArray<FVector> PathNormals = TArray<FVector>();
+	TArray<FProcMeshTangent> PathTangents = TArray<FProcMeshTangent>();
+	TArray<int32> PathTriangles = TArray<int32>();
 
 	float NoiseValue = 0.0f;
 	float offsetCalc = 0.0f;
 	float depthOffset = 0.0f;
 
-	AssetHelperFuncs AssetHelper;
+	//River uProcMesh Variables
+	TArray<FVector> RiverVertices = TArray<FVector>();
+	TArray<FVector> RiverNormals = TArray<FVector>();
+	TArray<FProcMeshTangent> RiverTangents = TArray<FProcMeshTangent>();
+	TArray<FVector2D> RiverUVs = TArray<FVector2D>();
+	TArray<int32> RiverTriangles = TArray<int32>();
+	TArray<FLinearColor> VertexColours = TArray<FLinearColor>();
+
+	//Mound uProcMesh Variables
+	TArray<FVector> MoundVertices = TArray<FVector>();
+	TArray<FVector> MoundNormals = TArray<FVector>();
+	TArray<FProcMeshTangent> MoundTangents = TArray<FProcMeshTangent>();
+	TArray<int32> MoundTriangles = TArray<int32>();
+	float MoundHeight = 600.0f;
+
+	// Generic uProcMesh Variables
+	FVector MeshVert = FVector::ZeroVector;
+	FVector MeshLeftEdge = FVector::ZeroVector;
+	FVector MeshSplinePoint = FVector::ZeroVector;
+	FVector MeshSplineTangent = FVector::ZeroVector;
+	FVector MeshEdgeVector = FVector::ZeroVector;
+
+	// Noise Variables
+	float Falloff = 0.0f;
+	float SharpnessMultiplier = 50.0f;
+	float FrequencyMultiplier = 0.003f;
+
+
 
 protected:
 	// Called when the game starts or when spawned
@@ -112,22 +221,46 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	bool IsPointInsideSphere(FVector Point, FVector SphereCenter, float SphereRadius);
-
 	void LimitMovementSmoothly(USplineComponent* GuideSpline, float MaxDistance, float PullSpeed);
 
 	void UpdateTerrainSpline();
 
-	UProcMeshGeneration_CPP* MeshGeneration;
-	UProcMeshUpdates_CPP* MeshUpdates;
+	void TriangleCalcs(TArray<FVector>& MeshVertices, TArray<int32>& MeshTriangles, int MeshVertCount, int i);
 
-	USpawnAssets_CPP* SpawnAssets;
-	UUpdateAssets_CPP* UpdateAssets;
+	void NormalCalcs(TArray<FVector>& MeshVertices, TArray<FVector>& MeshNormals, int MeshVertCount, int i);
 
-	//void UpdateWall(USplineComponent* GuideSpline);
+	bool IsPointInsideSphere(FVector Point, FVector SphereCenter, float SphereRadius);
 
-	/**TArray<FVector> GetValidSpawnPoints(UProceduralMeshComponent* Mesh, USplineComponent* GuideSpline);
+	void SplineRegulator(USplineComponent* GuideSpline);
+
+	FVector PathMeshHelper(int y, int MeshWidth, FVector& MeshEdge);
+
+	FVector MoundMeshHelper(int y, int MeshWidth, float& zValue, float zOffset, int i);
+
+	void GeneratePathMesh(USplineComponent* GuideSpline, UProceduralMeshComponent* ProcMesh, int MeshWidth, TArray<FVector>& MeshVertices,
+		TArray<FVector>& MeshNormals, TArray<FProcMeshTangent>& MeshTangents, TArray<int32>& MeshTriangles, UMaterialInterface* MeshMaterial, int PathVertCount);
+
+	void UpdatePathMesh(USplineComponent* GuideSpline, UProceduralMeshComponent* ProcMesh, int MeshWidth, TArray<FVector>& MeshVertices,
+		TArray<FVector>& MeshNormals, TArray<FProcMeshTangent>& MeshTangents, TArray<int32>& MeshTriangles, UMaterialInterface* MeshMaterial, int PathVertCount);
+
+	void GenerateRiverMesh(USplineComponent* GuideSpline, UProceduralMeshComponent* ProcMesh, int MeshWidth, TArray<FVector>& MeshVertices,
+		TArray<FVector>& MeshNormals, TArray<FProcMeshTangent>& MeshTangents, TArray<int32>& MeshTriangles, UMaterialInterface* MeshMaterial, int RiverVertCount);
+
+	void UpdateRiverMesh(USplineComponent* GuideSpline, UProceduralMeshComponent* ProcMesh, int MeshWidth, TArray<FVector>& MeshVertices,
+		TArray<FVector>& MeshNormals, TArray<FProcMeshTangent>& MeshTangents, TArray<int32>& MeshTriangles, UMaterialInterface* MeshMaterial, int RiverVertCount);
+
+	void GenerateMoundMesh(USplineComponent* GuideSpline, UProceduralMeshComponent* ProcMesh, int MeshWidth, TArray<FVector>& MeshVertices,
+		TArray<FVector>& MeshNormals, TArray<FProcMeshTangent>& MeshTangents, TArray<int32>& MeshTriangles, UMaterialInterface* MeshMaterial, int MoundVertCount);
+
+	void UpdateMoundMesh(USplineComponent* GuideSpline, UProceduralMeshComponent* ProcMesh, int MeshWidth, TArray<FVector>& MeshVertices,
+		TArray<FVector>& MeshNormals, TArray<FProcMeshTangent>& MeshTangents, TArray<int32>& MeshTriangles, UMaterialInterface* MeshMaterial, int MoundVertCount);
+
+	void SpawnWall(USplineComponent* GuideSpline);
+
+	void UpdateWall(USplineComponent* GuideSpline);
+
+	TArray<FVector> GetValidSpawnPoints(UProceduralMeshComponent* Mesh, USplineComponent* GuideSpline);
 	void SpawnAssetInstances(UHierarchicalInstancedStaticMeshComponent* HISM, const TArray<FVector>& SpawnPoints, UProceduralMeshComponent* Mesh, int ClusterSizeMin, int ClusterSizeMax);
 	FVector InterpolateHeight(const FVector& Point, UProceduralMeshComponent* Mesh);
-	bool PointInTriangle2D(const FVector2D& P, const FVector2D& A, const FVector2D& B, const FVector2D& C);*/	
+	bool PointInTriangle2D(const FVector2D& P, const FVector2D& A, const FVector2D& B, const FVector2D& C);	
 };

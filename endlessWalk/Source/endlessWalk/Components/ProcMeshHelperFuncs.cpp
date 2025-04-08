@@ -170,7 +170,7 @@ FVector ProcMeshHelperFuncs::PathMeshHelper(int y, int SplinePoints, FVector Mes
 		float XYNoiseFactor = FMath::Lerp(0.3f, 1.0f, Falloff);
 		MeshVert.X += (NoiseValue * XYNoiseFactor) * NoiseConfigData.NoiseAmplitude;
 		MeshVert.Y += (NoiseValue * XYNoiseFactor) * NoiseConfigData.NoiseAmplitude;
-		MeshVert.Z += (PathDynamicData.DepthOffset * ((PathConfigData.PathVertCount - 1) - y));
+		MeshVert.Z += (PathDynamicData.DepthOffset * ((PathConfigData.PathVertCount - 1) - y)) * 0.75f;
 	}
 	RiverDynamicData.RiverSpline->UpdateSpline();
 	WallDynamicData.WallSpline->UpdateSpline();

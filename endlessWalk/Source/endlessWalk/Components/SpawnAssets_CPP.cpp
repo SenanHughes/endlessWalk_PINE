@@ -29,7 +29,7 @@ void USpawnAssets_CPP::SpawnWall(const FWallConfigData& WallConfigData, FWallDyn
 
 	const float SplineLength = WallDynamicData.WallSpline->GetSplineLength();
 
-	while (WallDynamicData.EndDistance < SplineLength)
+	while (WallDynamicData.EndDistance < SplineLength - 400.0f)
 	{
 		// Randomly select between the two meshes
 		bool WallType = FMath::RandBool();
@@ -38,7 +38,7 @@ void USpawnAssets_CPP::SpawnWall(const FWallConfigData& WallConfigData, FWallDyn
 
 		if (WallDynamicData.StartDistance == 0.0f)
 		{
-			WallDynamicData.SplinePointCount = FMath::FloorToInt(SelectedMeshLength / SplineConfigData.PlaneDistance);
+			WallDynamicData.SplinePointCount = FMath::RoundToInt(SelectedMeshLength / SplineConfigData.PlaneDistance);
 		}
 
 		WallDynamicData.StartDistance = WallDynamicData.EndDistance - 10.0f;
