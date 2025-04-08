@@ -30,5 +30,5 @@ public:
 
 	void SpawnWall(const FWallConfigData& WallConfigData, FWallDynamicData& WallDynamicData, const FSplineConfigData& SplineConfigData);
 
-	void SpawnAssetInstances(UHierarchicalInstancedStaticMeshComponent* HISM, USplineComponent* GuideSpline, UProceduralMeshComponent* Mesh, int ClusterSizeMin, int ClusterSizeMax, TArray<FVector>& ValidSpawnPoints, int32& InstanceCount);
+	void SpawnAssetInstances(UHierarchicalInstancedStaticMeshComponent* HISM, UHierarchicalInstancedStaticMeshComponent* HISM1, USplineComponent* GuideSpline, UProceduralMeshComponent* Mesh, int ClusterSizeMin, int ClusterSizeMax, TArray<FVector>& ValidSpawnPoints, int32& InstanceCount);
 };

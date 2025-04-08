@@ -29,7 +29,7 @@ void USpawnAssets_CPP::SpawnWall(const FWallConfigData& WallConfigData, FWallDyn
 
 	const float SplineLength = WallDynamicData.WallSpline->GetSplineLength();
 
-	while (WallDynamicData.EndDistance < SplineLength)
+	while (WallDynamicData.EndDistance < SplineLength - 400.0f)
 	{
 		// Randomly select between the two meshes
 		bool WallType = FMath::RandBool();
@@ -38,7 +38,7 @@ void USpawnAssets_CPP::SpawnWall(const FWallConfigData& WallConfigData, FWallDyn
 
 		if (WallDynamicData.StartDistance == 0.0f)
 		{
-			WallDynamicData.SplinePointCount = FMath::FloorToInt(SelectedMeshLength / SplineConfigData.PlaneDistance);
+			WallDynamicData.SplinePointCount = FMath::RoundToInt(SelectedMeshLength / SplineConfigData.PlaneDistance);
 		}
 
 		WallDynamicData.StartDistance = WallDynamicData.EndDistance - 10.0f;
@@ -66,12 +66,13 @@ void USpawnAssets_CPP::SpawnWall(const FWallConfigData& WallConfigData, FWallDyn
 	}
 }
 
-void USpawnAssets_CPP::SpawnAssetInstances(UHierarchicalInstancedStaticMeshComponent* HISM, USplineComponent* GuideSpline, UProceduralMeshComponent* Mesh, int ClusterSizeMin, int ClusterSizeMax, TArray<FVector>& ValidSpawnPoints, int32& InstanceCount)
+void USpawnAssets_CPP::SpawnAssetInstances(UHierarchicalInstancedStaticMeshComponent* HISM, UHierarchicalInstancedStaticMeshComponent* HISM1, USplineComponent* GuideSpline, UProceduralMeshComponent* Mesh, int ClusterSizeMin, int ClusterSizeMax, TArray<FVector>& ValidSpawnPoints, int32& InstanceCount)
 {
-	if (!HISM) return;
+	if (!HISM || !HISM1) return;
 
 	// Clear existing instances
 	HISM->ClearInstances();
+	//HISM1->ClearInstances();
 
 	for (const FVector& Point : ValidSpawnPoints)
 	{
@@ -96,16 +97,27 @@ void USpawnAssets_CPP::SpawnAssetInstances(UHierarchicalInstancedStaticMeshCompo
 				// Interpolate the height based on the surrounding vertices
 				FVector InterpolatedPoint = AssetHelper.InterpolateHeight(ClusterPoint, Mesh);
 
-				FVector Normal = (InterpolatedPoint - ClusterPoint).GetSafeNormal();
-				float SlopeAngle = FMath::RadiansToDegrees(FMath::Acos(FVector::DotProduct(Normal, FVector::UpVector)));
-				if (SlopeAngle > 25.0f) continue; // Skip steep slopes
+				//FVector Normal = (InterpolatedPoint - ClusterPoint).GetSafeNormal();
+				//float SlopeAngle = FMath::RadiansToDegrees(FMath::Acos(FVector::DotProduct(Normal, FVector::UpVector)));
+				//UE_LOG(LogTemp, Warning, TEXT("Slope Angle: %f, GuideSpline Name : %s"), SlopeAngle, *GuideSpline->GetName());
+				//if (SlopeAngle > 25.0f) continue; // Skip steep slopes
 
 				FRotator Rotation = InterpolatedPoint.GetSafeNormal().Rotation();
+				HISM->AddInstance(FTransform(Rotation, InterpolatedPoint, FVector(ScaleFactor)));
 
 				// Spawn the instance
-				HISM->AddInstance(FTransform(Rotation, InterpolatedPoint, FVector(ScaleFactor)));
+				/**if (rand() % 2 == 0)
+				{
+				}
+				else
+				{
+					// Spawn the instance with a different mesh
+					HISM1->AddInstance(FTransform(Rotation, InterpolatedPoint, FVector(ScaleFactor)));
+				}*/
 			}
 		}
 	}
+	// Update the instance count
 	InstanceCount = HISM->GetInstanceCount();
+	//InstanceCount1 = HISM1->GetInstanceCount();
 }

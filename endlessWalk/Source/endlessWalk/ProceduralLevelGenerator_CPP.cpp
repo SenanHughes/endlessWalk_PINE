@@ -2,6 +2,7 @@
 
 
 #include "ProceduralLevelGenerator_CPP.h"
+#include "DrawDebugHelpers.h"
 
 // Sets default values
 AProceduralLevelGenerator_CPP::AProceduralLevelGenerator_CPP(const FObjectInitializer& ObjectInitializer)
@@ -58,10 +59,16 @@ AProceduralLevelGenerator_CPP::AProceduralLevelGenerator_CPP(const FObjectInitia
 	PlantDynamicData.PlantInstance = CreateDefaultSubobject<UHierarchicalInstancedStaticMeshComponent>(TEXT("HierarchicalInstancedMesh"));
 	PlantDynamicData.PlantInstance->SetMobility(EComponentMobility::Movable);
 	PlantDynamicData.PlantInstance->SetupAttachment(RootComponent);
+	PlantDynamicData.PlantInstance1 = CreateDefaultSubobject<UHierarchicalInstancedStaticMeshComponent>(TEXT("HierarchicalInstancedMesh1"));
+	PlantDynamicData.PlantInstance1->SetMobility(EComponentMobility::Movable);
+	PlantDynamicData.PlantInstance1->SetupAttachment(RootComponent);
 
-	/**PlantDynamicData.PlantInstance2 = CreateDefaultSubobject<UHierarchicalInstancedStaticMeshComponent>(TEXT("HierarchicalInstancedMesh2"));
-	PlantDynamicData.PlantInstance2->SetMobility(EComponentMobility::Movable);
-	PlantDynamicData.PlantInstance2->SetupAttachment(RootComponent);*/
+	PlantDynamicData1.PlantInstance = CreateDefaultSubobject<UHierarchicalInstancedStaticMeshComponent>(TEXT("HierarchicalInstancedMesh2"));
+	PlantDynamicData1.PlantInstance->SetMobility(EComponentMobility::Movable);
+	PlantDynamicData1.PlantInstance->SetupAttachment(RootComponent);
+	PlantDynamicData1.PlantInstance1 = CreateDefaultSubobject<UHierarchicalInstancedStaticMeshComponent>(TEXT("HierarchicalInstancedMesh3"));
+	PlantDynamicData1.PlantInstance1->SetMobility(EComponentMobility::Movable);
+	PlantDynamicData1.PlantInstance1->SetupAttachment(RootComponent);
 
 	MeshGeneration = ObjectInitializer.CreateDefaultSubobject<UProcMeshGeneration_CPP>(this, TEXT("MeshGeneration"));
 	MeshGeneration->RegisterComponent();
@@ -119,21 +126,60 @@ void AProceduralLevelGenerator_CPP::BeginPlay()
 	SphereCenter = SphereTrigger->GetComponentLocation();
 	SphereRadius = SphereTrigger->GetScaledSphereRadius();
 	DistanceToCenter = 0.0f;
-	EdgeThreshold = SphereRadius * 0.85f;
+	EdgeThreshold = SphereRadius * 0.75f;
 
-
+	// Spawn Procedural Meshes
 	MeshGeneration->GeneratePathMesh(PathConfigData, PathDynamicData, RiverConfigData, RiverDynamicData, WallConfigData, WallDynamicData, NoiseConfigData, NoiseDynamicData, SplineConfigData);
 	MeshGeneration->GenerateRiverMesh(RiverConfigData, RiverDynamicData, MoundConfigData, MoundDynamicData, SplineConfigData);
 	MeshGeneration->GenerateMoundMesh(MoundConfigData, MoundDynamicData, RiverConfigData, NoiseConfigData, NoiseDynamicData, SplineConfigData);
 
+
+	// Spawn the wall
 	SpawnAssets->SpawnWall(WallConfigData, WallDynamicData, SplineConfigData);
-	PlantDynamicData.PlantInstance->SetStaticMesh(PlantConfigData.PlantMesh);
+
+	// Spawn the plants
+	TArray<UStaticMesh*> PlantMeshes = {
+		PlantConfigData.PlantMesh,
+		PlantConfigData.PlantMesh1,
+		PlantConfigData.PlantMesh2,
+		PlantConfigData.PlantMesh3
+	};
+
+	for (int32 i = PlantMeshes.Num() - 1; i > 0; --i)
+	{
+		int32 j = FMath::RandRange(0, i);
+		PlantMeshes.Swap(i, j);
+	}
+
+	PlantDynamicData.PlantInstance->SetStaticMesh(PlantMeshes[0]);
+	PlantDynamicData1.PlantInstance->SetStaticMesh(PlantMeshes[1]);
+
+	/**for (int32 i = PlantMeshes.Num() - 1; i > 0; --i)
+	{
+		int32 j = FMath::RandRange(0, i);
+		PlantMeshes.Swap(i, j);
+	}
+
+	PlantDynamicData1.PlantInstance->SetStaticMesh(PlantMeshes[0]);
+	PlantDynamicData1.PlantInstance1->SetStaticMesh(PlantMeshes[1]);*/
 
 
-	PlantDynamicData.ValidSpawnPoints = AssetHelper.GetValidSpawnPoints(PathDynamicData.PathMesh, PathDynamicData.PathSpline, PathConfigData.PathVertCount, 0, PathDynamicData.PathVertices.Num(), PlantDynamicData.PlantInstance);
-	SpawnAssets->SpawnAssetInstances(PlantDynamicData.PlantInstance, PathDynamicData.PathSpline, PathDynamicData.PathMesh, 3, 6, PlantDynamicData.ValidSpawnPoints, PlantDynamicData.InstanceCount);
+	PlantDynamicData.ValidSpawnPoints = AssetHelper.GetValidSpawnPoints(PathDynamicData.PathMesh, PathDynamicData.PathSpline, PathConfigData.PathVertCount, 0, PathDynamicData.PathVertices.Num());
+	PlantDynamicData1.ValidSpawnPoints = AssetHelper.GetValidSpawnPoints(MoundDynamicData.MoundMesh, MoundDynamicData.MoundSpline, MoundConfigData.MoundVertCount, 0, MoundDynamicData.MoundVertices.Num());
 
-	//SpawnAssetInstances(PlantDynamicData.PlantInstance, GetValidSpawnPoints(PathDynamicData.PathMesh, PathDynamicData.PathSpline), PathDynamicData.PathMesh, 3, 6);
+
+	SpawnAssets->SpawnAssetInstances(PlantDynamicData.PlantInstance, PlantDynamicData.PlantInstance1, MoundDynamicData.MoundSpline, MoundDynamicData.MoundMesh, 2, 5, PlantDynamicData.ValidSpawnPoints, PlantDynamicData.InstanceCount);
+	SpawnAssets->SpawnAssetInstances(PlantDynamicData1.PlantInstance, PlantDynamicData1.PlantInstance1, MoundDynamicData.MoundSpline, MoundDynamicData.MoundMesh, 4, 7, PlantDynamicData1.ValidSpawnPoints, PlantDynamicData1.InstanceCount);
+
+	// Spawn the rocks
+	/**RockDynamicData.RockInstance->SetStaticMesh(RockConfigData.RockMesh);
+	RockDynamicData.RockInstance1->SetStaticMesh(RockConfigData.RockMesh1);
+	RockDynamicData.RockInstance2->SetStaticMesh(RockConfigData.RockMesh2);
+	RockDynamicData.RockInstance3->SetStaticMesh(RockConfigData.RockMesh3);
+
+
+	RockDynamicData.ValidSpawnPoints = AssetHelper.GetValidSpawnPoints(PathDynamicData.PathMesh, PathDynamicData.PathSpline, PathConfigData.PathVertCount, 0, PathDynamicData.PathVertices.Num(), RockDynamicData.RockInstance);
+	SpawnAssets->SpawnAssetInstances(RockDynamicData.RockInstance, PathDynamicData.PathSpline, PathDynamicData.PathMesh, 3, 6, RockDynamicData.ValidSpawnPoints, RockDynamicData.InstanceCount);*/
 }
 
 // Called every frame
@@ -154,9 +200,11 @@ void AProceduralLevelGenerator_CPP::Tick(float DeltaTime)
 		}
 		UpdateTerrainSpline();
 
-		PlantDynamicData.ValidSpawnPoints = AssetHelper.GetValidSpawnPoints(PathDynamicData.PathMesh, PathDynamicData.PathSpline, PathConfigData.PathVertCount,	(PathDynamicData.PathVertices.Num() - (PathConfigData.PathVertCount + 1)), 
-																					PathDynamicData.PathVertices.Num(), PlantDynamicData.PlantInstance);
-		UpdateAssets->UpdateAssetInstances(PlantDynamicData.PlantInstance, PathDynamicData.PathSpline, PathDynamicData.PathMesh, 3, 6, PlantDynamicData.ValidSpawnPoints, PlantDynamicData.InstanceCount, PlantDynamicData.LogicalStart);
+		PlantDynamicData.ValidSpawnPoints = AssetHelper.GetValidSpawnPoints(PathDynamicData.PathMesh, PathDynamicData.PathSpline, PathConfigData.PathVertCount,	(PathDynamicData.PathVertices.Num() - (PathConfigData.PathVertCount + 1)), PathDynamicData.PathVertices.Num());
+		UpdateAssets->UpdateAssetInstances(PlantDynamicData.PlantInstance,PlantDynamicData.PlantInstance1, PathDynamicData.PathSpline, PathDynamicData.PathMesh, 3, 6, PlantDynamicData.ValidSpawnPoints, PlantDynamicData.InstanceCount, PlantDynamicData.LogicalStart);
+
+		PlantDynamicData1.ValidSpawnPoints = AssetHelper.GetValidSpawnPoints(MoundDynamicData.MoundMesh, MoundDynamicData.MoundSpline, MoundConfigData.MoundVertCount,	(MoundDynamicData.MoundVertices.Num() - (MoundConfigData.MoundVertCount + 1)), MoundDynamicData.MoundVertices.Num());
+		UpdateAssets->UpdateAssetInstances(PlantDynamicData1.PlantInstance, PlantDynamicData1.PlantInstance1, MoundDynamicData.MoundSpline, MoundDynamicData.MoundMesh, 3, 6, PlantDynamicData1.ValidSpawnPoints, PlantDynamicData1.InstanceCount, PlantDynamicData1.LogicalStart);
 
 		WallDynamicData.WallCounter += 1;
 		if (WallDynamicData.WallCounter >= WallDynamicData.SplinePointCount)
@@ -240,10 +288,31 @@ void AProceduralLevelGenerator_CPP::UpdateTerrainSpline()
 	{
 		FVector ToCenter = (SphereCenter - NewPoint).GetSafeNormal(); // Vector pointing inward
 		float InfluenceFactor = (DistanceToCenter - EdgeThreshold) / (SphereRadius - EdgeThreshold); // Smooth transition
-		FVector SteeringAdjustment = ToCenter * InfluenceFactor * NoiseDynamicData.SharpnessMultiplier * 0.25f; // Scale influence
+		FVector SteeringAdjustment = ToCenter * InfluenceFactor * NoiseDynamicData.SharpnessMultiplier * 0.4f; // Scale influence
 
 		NewPoint += SteeringAdjustment; // Apply gentle inward force
 	}
+
+	FVector NearestPoint = PathDynamicData.PathSpline->FindLocationClosestToWorldLocation(NewPoint, ESplineCoordinateSpace::Local);
+
+	float DistanceToNearest = FVector::Dist(NearestPoint, NewPoint);
+	FVector ToNearest = (NearestPoint - NewPoint).GetSafeNormal();
+
+	// Dot product: 1 = same direction, 0 = perpendicular, -1 = opposite direction
+	float Alignment = FVector::DotProduct(Direction, ToNearest);
+
+	// Optional threshold: adjust as needed (e.g. 0.3 allows for ~70 degrees cone in front)
+	const float MinForwardAlignment = 0.4f;
+	FVector RepelDirection;
+	// Check both distance and alignment
+	if (DistanceToNearest < SplineConfigData.MinDistanceToPreviousPoints && Alignment > MinForwardAlignment)
+	{
+		// Repel only if point is in the forward arc
+		RepelDirection = (NewPoint - NearestPoint).GetSafeNormal();
+		float PushStrength = FMath::Clamp((SplineConfigData.MinDistanceToPreviousPoints - DistanceToNearest) / SplineConfigData.MinDistanceToPreviousPoints, 0.0f, 1.0f);
+		NewPoint += RepelDirection * PushStrength * 100.0f;
+	}
+		
 
 	// Add the new point to the spline
 	PathDynamicData.PathSpline->AddSplinePoint(NewPoint, ESplineCoordinateSpace::Local, false);

@@ -30,5 +30,5 @@ public:
 
 	void UpdateWall(const FWallConfigData& WallConfigData, FWallDynamicData& WallDynamicData, const FSplineConfigData& SplineConfigData);
 
-	void UpdateAssetInstances(UHierarchicalInstancedStaticMeshComponent* HISM, USplineComponent* GuideSpline, UProceduralMeshComponent* Mesh, int32 ClusterSizeMin, int32 ClusterSizeMax, TArray<FVector>& ValidSpawnPoints, int32 InstanceCount, int32& LogicalStart);
+	void UpdateAssetInstances(UHierarchicalInstancedStaticMeshComponent* HISM, UHierarchicalInstancedStaticMeshComponent* HISM1, USplineComponent* GuideSpline, UProceduralMeshComponent* Mesh, int32 ClusterSizeMin, int32 ClusterSizeMax, TArray<FVector>& ValidSpawnPoints, int32 InstanceCount, int32& LogicalStart);
 };

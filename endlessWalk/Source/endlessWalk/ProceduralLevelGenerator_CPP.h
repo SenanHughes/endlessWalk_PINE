@@ -55,39 +55,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Settings", meta = (DisplayName = "Plant Parameters"))
 	FPlantConfigData PlantConfigData;
+
 	FPlantDynamicData PlantDynamicData;
-
-	/**UPROPERTY(EditAnywhere, Category = "03 ProceduralAssets | Plants")
-	UStaticMesh* PlantMesh = nullptr;
-
-	UPROPERTY(EditAnywhere, Category = "03 ProceduralAssets | Plants")
-	UStaticMesh* PlantMesh2 = nullptr;*/
-
-
-
-
-	//UPROPERTY(EditAnywhere, Category = "03 ProceduralAssets | Misc")
-	//UStaticMesh* AssetToSpawn5 = nullptr;
-
-	//UPROPERTY(EditAnywhere, Category = "03 ProceduralAssets | Misc")
-	//UStaticMesh* AssetToSpawn6 = nullptr;
-
-	//UPROPERTY(EditAnywhere, Category = "03 ProceduralAssets | Misc")
-	//UStaticMesh* AssetToSpawn7 = nullptr;
-
-	//UPROPERTY(EditAnywhere, Category = "03 ProceduralAssets | Misc")
-	//UStaticMesh* AssetToSpawn8 = nullptr;
-
-
-	//** Plant Asset Variables 
-	/**UPROPERTY()
-	UHierarchicalInstancedStaticMeshComponent* PlantInstance = nullptr;
-
-	UPROPERTY()
-	UHierarchicalInstancedStaticMeshComponent* PlantInstance2 = nullptr;*/
-
-
-
+	FPlantDynamicData PlantDynamicData1;
 
 	// Spline Containment Variables
 	FVector SphereCenter;
@@ -123,11 +93,4 @@ public:
 
 	USpawnAssets_CPP* SpawnAssets;
 	UUpdateAssets_CPP* UpdateAssets;
-
-	//void UpdateWall(USplineComponent* GuideSpline);
-
-	/**TArray<FVector> GetValidSpawnPoints(UProceduralMeshComponent* Mesh, USplineComponent* GuideSpline);
-	void SpawnAssetInstances(UHierarchicalInstancedStaticMeshComponent* HISM, const TArray<FVector>& SpawnPoints, UProceduralMeshComponent* Mesh, int ClusterSizeMin, int ClusterSizeMax);
-	FVector InterpolateHeight(const FVector& Point, UProceduralMeshComponent* Mesh);
-	bool PointInTriangle2D(const FVector2D& P, const FVector2D& A, const FVector2D& B, const FVector2D& C);*/	
 };

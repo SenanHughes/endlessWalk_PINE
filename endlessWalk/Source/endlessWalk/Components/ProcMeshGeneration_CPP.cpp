@@ -156,6 +156,7 @@ void UProcMeshGeneration_CPP::GenerateMoundMesh(const FMoundConfigData& MoundCon
 				MeshVert = MeshHelperFuncs.MoundMeshHelper(y, SplineConfigData.SplinePoints, MeshSplineTangent, MeshLeftEdge, MeshEdgeVector, MoundConfigData, MoundDynamicData, NoiseConfigData, NoiseDynamicData.Noise, zValue);
 				zValue -= MoundDynamicData.zOffset75;
 			}
+			MoundDynamicData.MoundUVs.Add(FVector2D(MeshVert.X / 1000.0, MeshVert.Y / 1000.0));
 			MoundDynamicData.MoundVertices.Add(MeshVert);
 			MoundDynamicData.MoundTangents.Add(FProcMeshTangent(MeshSplineTangent, false));
 		}
