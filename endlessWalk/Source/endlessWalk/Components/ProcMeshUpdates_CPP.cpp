@@ -100,9 +100,7 @@ void UProcMeshUpdates_CPP::UpdateRiverMesh(const FRiverConfigData& RiverConfigDa
 		RiverDynamicData.RiverVertices.Add(MeshVert);
 
 		RiverDynamicData.RiverTangents.Add(MeshTangent);
-		UE_LOG(LogTemp, Warning, TEXT("PreUpdated Colour: %s"), *RiverDynamicData.VertexColours.Last().ToString());
 		RiverDynamicData.VertexColours.Add(FLinearColor(TangentX.X, TangentX.Y, 0.5f, 1.0f));
-		UE_LOG(LogTemp, Warning, TEXT("Updated Colour: %s"), *RiverDynamicData.VertexColours.Last().ToString());
 	}
 
 	for (int i = 0; i < RiverConfigData.RiverVertCount; i++)

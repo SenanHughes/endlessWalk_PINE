@@ -86,11 +86,16 @@ void UUpdateAssets_CPP::UpdateAssetInstances(UHierarchicalInstancedStaticMeshCom
 	{
 		float NoiseVal = FMath::PerlinNoise2D(FVector2D(Point.X, Point.Y) * 0.1f);
 		NoiseVal = (NoiseVal + 1.0f) / 2.0f; // Normalize to [0, 1]
+
+		FRotator Rotation = FRotator::ZeroRotator;
+
 		if (NoiseVal > 0.4f)
 		{
+			bool OriginalPoint = false;
 			//int ClusterSize = FMath::RandRange(ClusterSizeMin, ClusterSizeMax); // Random cluster size
 			for (int32 i = 0; i < ClusterSize; i++)
 			{
+				int32 AttemptCount = 0;
 				bool TooSteep = true;
 				FVector InterpolatedPoint = FVector::ZeroVector;
 				float ScaleFactor = 0.0f;
@@ -111,13 +116,26 @@ void UUpdateAssets_CPP::UpdateAssetInstances(UHierarchicalInstancedStaticMeshCom
 
 					FVector Normal = (InterpolatedPoint - ClusterPoint).GetSafeNormal();
 					float SlopeAngle = FMath::RadiansToDegrees(FMath::Acos(FVector::DotProduct(Normal, FVector::UpVector)));
-					if (SlopeAngle < 25.0f)
+					AttemptCount++;
+					if (SlopeAngle >  0.0f)
 					{
 						TooSteep = false; // Exit the loop if the slope is not too steep
+
+						Rotation = InterpolatedPoint.GetSafeNormal().Rotation();
+					}
+					else if (AttemptCount > 10 && !OriginalPoint)
+					{
+						// If too steep after 10 attempts, use the original point
+						InterpolatedPoint = Point;
+						Rotation = InterpolatedPoint.GetSafeNormal().Rotation();
+						OriginalPoint = true;
+					}
+					else
+					{
+						TooSteep = false;
+						InterpolatedPoint.Z = -1000.0f;
 					}
 				}
-
-				FRotator Rotation = InterpolatedPoint.GetSafeNormal().Rotation();
 
 				int32 InstanceIndex = LogicalStart % InstanceCount;
 
