@@ -36,17 +36,12 @@ void UUpdateAssets_CPP::UpdateWall(const FWallConfigData& WallConfigData, FWallD
 {
 	if (WallDynamicData.SplineMeshComponents.Num() == 0) return;
 
-	// Remove the component at index 0
-	USplineMeshComponent* FirstSplineMesh = WallDynamicData.SplineMeshComponents[0];
-	WallDynamicData.SplineMeshComponents.RemoveAt(0);
-
 	// Randomly select between the two meshes
 	bool WallType = FMath::RandBool();
 	UStaticMesh* SelectedMesh = (WallType) ? WallConfigData.WallMesh1 : WallConfigData.WallMesh2;
-	float SelectedMeshLength = SelectedMesh->GetBounds().BoxExtent.X * 2;
+	float SelectedMeshLength = WallDynamicData.SplineMeshComponents[WallDynamicData.LogicalStart]->GetStaticMesh()->GetBounds().BoxExtent.X * 2.0f;
 
 
-	WallDynamicData.SplinePointCount = FMath::FloorToInt(SelectedMeshLength / SplineConfigData.PlaneDistance);
 
 	// Calculate the new start and end positions and tangents for the repositioned component
 
@@ -58,13 +53,18 @@ void UUpdateAssets_CPP::UpdateWall(const FWallConfigData& WallConfigData, FWallD
 	FVector StartTangent = WallDynamicData.WallSpline->GetTangentAtDistanceAlongSpline(WallDynamicData.StartDistance, ESplineCoordinateSpace::World);
 	FVector EndTangent = WallDynamicData.WallSpline->GetTangentAtDistanceAlongSpline(WallDynamicData.EndDistance, ESplineCoordinateSpace::World);
 
-	// Update the repositioned component with the new start and end positions and tangents
-	FirstSplineMesh->SetStaticMesh(SelectedMesh);
-	FirstSplineMesh->SetStartAndEnd(WallDynamicData.SegmentStartLocation, StartTangent, WallDynamicData.SegmentEndLocation, EndTangent);
-	FirstSplineMesh->UpdateMesh();
-
 	// Add the removed component to the end of the array
-	WallDynamicData.SplineMeshComponents.Add(FirstSplineMesh);
+	WallDynamicData.SplineMeshComponents[WallDynamicData.LogicalStart]->SetStaticMesh(SelectedMesh);
+	WallDynamicData.SplineMeshComponents[WallDynamicData.LogicalStart]->SetStartAndEnd(WallDynamicData.SegmentStartLocation, StartTangent, WallDynamicData.SegmentEndLocation, EndTangent);
+	WallDynamicData.SplineMeshComponents[WallDynamicData.LogicalStart]->UpdateMesh();
+	WallDynamicData.LogicalStart++;
+	if (WallDynamicData.LogicalStart >= WallDynamicData.SplineMeshComponents.Num())
+	{
+		WallDynamicData.LogicalStart = 0; // Reset to the beginning if we reach the end
+	}
+
+	float FirstMeshLength = WallDynamicData.SplineMeshComponents[WallDynamicData.LogicalStart]->GetStaticMesh()->GetBounds().BoxExtent.X * 2.0f;
+	WallDynamicData.SplinePointCount = FMath::RoundToInt(SelectedMeshLength / SplineConfigData.PlaneDistance);
 }
 
 void UUpdateAssets_CPP::UpdateAssetInstances(UHierarchicalInstancedStaticMeshComponent* HISM, USplineComponent* GuideSpline, UProceduralMeshComponent* Mesh, int32 ClusterSizeMin, int32 ClusterSizeMax, TArray<FVector>& ValidSpawnPoints, int32 InstanceCount, int32& LogicalStart)

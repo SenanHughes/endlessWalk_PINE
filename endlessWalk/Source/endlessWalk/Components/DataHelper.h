@@ -21,6 +21,8 @@ struct FSplineConfigData
 	int SplinePoints = 200;
 	UPROPERTY(EditAnywhere)
 	int PlaneDistance = 100;
+	UPROPERTY()
+	int MinDistanceToPreviousPoints = 1000.0f;
 };
 
 USTRUCT(BlueprintType)
@@ -49,6 +51,10 @@ struct FPathConfigData
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UMaterialInterface* PathMaterial = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UMaterialInterface* PathMaterial1 = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UMaterialInterface* PathMaterial2 = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int PathVertCount = 12;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
@@ -106,6 +112,10 @@ struct FMoundConfigData
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UMaterialInterface* MoundMaterial = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UMaterialInterface* MoundMaterial1 = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UMaterialInterface* MoundMaterial2 = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int MoundVertCount = 12;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	int MoundWidth = 600;
@@ -119,6 +129,7 @@ struct FMoundDynamicData
 	UPROPERTY()
 	UProceduralMeshComponent* MoundMesh;
 	TArray<FVector> MoundVertices = TArray<FVector>();
+	TArray<FVector2D> MoundUVs = TArray<FVector2D>();
 	TArray<FVector> MoundNormals = TArray<FVector>();
 	TArray<FProcMeshTangent> MoundTangents = TArray<FProcMeshTangent>();
 	TArray<int32> MoundTriangles = TArray<int32>();
@@ -152,6 +163,7 @@ struct FWallDynamicData
 	float EndDistance = 0.0f;
 	int32 WallCounter = 0;
 	int32 SplinePointCount = 0;
+	int32 LogicalStart = 0;
 };
 	
 USTRUCT(BlueprintType)
@@ -162,7 +174,11 @@ struct FPlantConfigData
 	UPROPERTY(EditAnywhere)
 	UStaticMesh* PlantMesh = nullptr;
 	UPROPERTY(EditAnywhere)
+	UStaticMesh* PlantMesh1 = nullptr;
+	UPROPERTY(EditAnywhere)
 	UStaticMesh* PlantMesh2 = nullptr;
+	UPROPERTY(EditAnywhere)
+	UStaticMesh* PlantMesh3 = nullptr;
 
 };
 
@@ -170,6 +186,38 @@ struct FPlantDynamicData
 {
 	UPROPERTY()
 	UHierarchicalInstancedStaticMeshComponent* PlantInstance = nullptr;
+	UPROPERTY()
+	UHierarchicalInstancedStaticMeshComponent* PlantInstance1 = nullptr;
+	TArray<FVector> ValidSpawnPoints;
+	int32 InstanceCount;
+	int32 LogicalStart;
+};
+	
+USTRUCT(BlueprintType)
+struct FRockConfigData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere)
+	UStaticMesh* RockMesh = nullptr;
+	UPROPERTY(EditAnywhere)
+	UStaticMesh* RockMesh1 = nullptr;
+	UPROPERTY(EditAnywhere)
+	UStaticMesh* RockMesh2 = nullptr;
+	UPROPERTY(EditAnywhere)
+	UStaticMesh* RockMesh3 = nullptr;
+};
+
+struct FRockDynamicData
+{
+	UPROPERTY()
+	UHierarchicalInstancedStaticMeshComponent* RockInstance = nullptr;
+	UPROPERTY()
+	UHierarchicalInstancedStaticMeshComponent* RockInstance1 = nullptr;
+	UPROPERTY()
+	UHierarchicalInstancedStaticMeshComponent* RockInstance2 = nullptr;
+	UPROPERTY()
+	UHierarchicalInstancedStaticMeshComponent* RockInstance3 = nullptr;
 	TArray<FVector> ValidSpawnPoints;
 	int32 InstanceCount;
 	int32 LogicalStart;

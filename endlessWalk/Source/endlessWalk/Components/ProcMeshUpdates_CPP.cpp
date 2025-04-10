@@ -67,7 +67,7 @@ void UProcMeshUpdates_CPP::UpdateRiverMesh(const FRiverConfigData& RiverConfigDa
 	FVector TangentX = MeshTangent.TangentX.GetSafeNormal();
 	if (TangentX.X < 0.0f)
 	{
-		TangentX.X = -TangentX.X;
+		//TangentX.X = -TangentX.X;
 	}
 	if (TangentX.Y < 0.0f)
 	{
@@ -100,14 +100,17 @@ void UProcMeshUpdates_CPP::UpdateRiverMesh(const FRiverConfigData& RiverConfigDa
 		RiverDynamicData.RiverVertices.Add(MeshVert);
 
 		RiverDynamicData.RiverTangents.Add(MeshTangent);
+		UE_LOG(LogTemp, Warning, TEXT("PreUpdated Colour: %s"), *RiverDynamicData.VertexColours.Last().ToString());
 		RiverDynamicData.VertexColours.Add(FLinearColor(TangentX.X, TangentX.Y, 0.5f, 1.0f));
+		UE_LOG(LogTemp, Warning, TEXT("Updated Colour: %s"), *RiverDynamicData.VertexColours.Last().ToString());
 	}
 
 	for (int i = 0; i < RiverConfigData.RiverVertCount; i++)
 	{
 		MeshHelperFuncs.NormalCalcs(RiverDynamicData.RiverVertices, RiverDynamicData.RiverNormals, RiverConfigData.RiverVertCount, (RiverDynamicData.RiverVertices.Num() - RiverConfigData.RiverVertCount) + i);
 	}
-	RiverDynamicData.RiverMesh->UpdateMeshSection_LinearColor(0, RiverDynamicData.RiverVertices, RiverDynamicData.RiverNormals, TArray<FVector2D>(), RiverDynamicData.VertexColours, RiverDynamicData.RiverTangents);
+	//RiverDynamicData.RiverMesh->UpdateMeshSection_LinearColor(0, RiverDynamicData.RiverVertices, RiverDynamicData.RiverNormals, TArray<FVector2D>(), RiverDynamicData.VertexColours, RiverDynamicData.RiverTangents);
+	RiverDynamicData.RiverMesh->CreateMeshSection_LinearColor(0, RiverDynamicData.RiverVertices, RiverDynamicData.RiverTriangles, RiverDynamicData.RiverNormals, TArray<FVector2D>(), RiverDynamicData.VertexColours, RiverDynamicData.RiverTangents, true, false);
 }
 
 void UProcMeshUpdates_CPP::UpdateMoundMesh(const FMoundConfigData& MoundConfigData, FMoundDynamicData& MoundDynamicData, const FRiverConfigData& RiverConfigData, const FNoiseConfigData& NoiseConfigData, FNoiseDynamicData& NoiseDynamicData, 

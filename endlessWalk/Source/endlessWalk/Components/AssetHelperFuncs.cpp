@@ -1,6 +1,6 @@
 #include "AssetHelperFuncs.h"
 
-TArray<FVector> AssetHelperFuncs::GetValidSpawnPoints(UProceduralMeshComponent* Mesh, USplineComponent* GuideSpline, int MeshVertCount, int VertMin, int VertMax, UHierarchicalInstancedStaticMeshComponent* HISM)
+TArray<FVector> AssetHelperFuncs::GetValidSpawnPoints(UProceduralMeshComponent* Mesh, USplineComponent* GuideSpline, int MeshVertCount, int VertMin, int VertMax)
 {
 	TArray<FVector> SpawnPoints;
 	FProcMeshSection* Section = Mesh->GetProcMeshSection(0);
@@ -13,11 +13,15 @@ TArray<FVector> AssetHelperFuncs::GetValidSpawnPoints(UProceduralMeshComponent* 
 
 		if (SlopeAngle > 25.0f && Vertex.Position.Z != Section->SectionLocalBox.Min.Z)
 		{
-			FVector ClosestSplinePoint = GuideSpline->FindLocationClosestToWorldLocation(Vertex.Position, ESplineCoordinateSpace::World);
-			FVector RightVector = GuideSpline->GetRightVectorAtSplinePoint(ClosestSplinePoint.X, ESplineCoordinateSpace::World);
+			FVector ClosestSplinePoint = GuideSpline->FindLocationClosestToWorldLocation(Vertex.Position, ESplineCoordinateSpace::Local);
+			FVector RightVector = GuideSpline->GetRightVectorAtSplinePoint(ClosestSplinePoint.X, ESplineCoordinateSpace::Local);
 			FVector ToPoint = Vertex.Position - ClosestSplinePoint;
 
-			if (FVector::DotProduct(ToPoint, RightVector) < 0.0f)
+			if (GuideSpline->GetName() == "PathSpline" && FVector::DotProduct(ToPoint, RightVector) < 0.0f)
+			{
+				SpawnPoints.Add(Vertex.Position);
+			}
+			else if (GuideSpline->GetName() == "MoundSpline" && FVector::DotProduct(ToPoint, RightVector) >= -100.0f)
 			{
 				SpawnPoints.Add(Vertex.Position);
 			}

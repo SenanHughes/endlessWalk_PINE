@@ -29,7 +29,7 @@ void USpawnAssets_CPP::SpawnWall(const FWallConfigData& WallConfigData, FWallDyn
 
 	const float SplineLength = WallDynamicData.WallSpline->GetSplineLength();
 
-	while (WallDynamicData.EndDistance < SplineLength)
+	while (WallDynamicData.EndDistance < SplineLength - 400.0f)
 	{
 		// Randomly select between the two meshes
 		bool WallType = FMath::RandBool();
@@ -38,7 +38,7 @@ void USpawnAssets_CPP::SpawnWall(const FWallConfigData& WallConfigData, FWallDyn
 
 		if (WallDynamicData.StartDistance == 0.0f)
 		{
-			WallDynamicData.SplinePointCount = FMath::FloorToInt(SelectedMeshLength / SplineConfigData.PlaneDistance);
+			WallDynamicData.SplinePointCount = FMath::RoundToInt(SelectedMeshLength / SplineConfigData.PlaneDistance);
 		}
 
 		WallDynamicData.StartDistance = WallDynamicData.EndDistance - 10.0f;
@@ -83,29 +83,38 @@ void USpawnAssets_CPP::SpawnAssetInstances(UHierarchicalInstancedStaticMeshCompo
 			int ClusterSize = FMath::RandRange(ClusterSizeMin, ClusterSizeMax); // Random cluster size
 			for (int32 i = 0; i < ClusterSize; i++)
 			{
+				bool TooSteep = true;
+				FVector InterpolatedPoint = FVector::ZeroVector;
+				float ScaleFactor = 0.0f;
 				// Generate random offset within a small radius around the point
-				FVector Offset = FVector(
-					FMath::RandRange(-50.0f, 50.0f),
-					FMath::RandRange(-50.0f, 50.0f),
-					0.0f
-				);
+				while (TooSteep)
+				{
+					FVector Offset = FVector(
+						FMath::RandRange(-50.0f, 50.0f),
+						FMath::RandRange(-50.0f, 50.0f),
+						0.0f
+					);
 
-				FVector ClusterPoint = Point + Offset;
-				float ScaleFactor = FMath::Lerp(0.6f, 1.2f, FMath::RandRange(0.0f, 1.0f));
+					FVector ClusterPoint = Point + Offset;
+					ScaleFactor = FMath::Lerp(0.6f, 1.2f, FMath::RandRange(0.0f, 1.0f));
 
-				// Interpolate the height based on the surrounding vertices
-				FVector InterpolatedPoint = AssetHelper.InterpolateHeight(ClusterPoint, Mesh);
+					// Interpolate the height based on the surrounding vertices
+					InterpolatedPoint = AssetHelper.InterpolateHeight(ClusterPoint, Mesh);
 
-				FVector Normal = (InterpolatedPoint - ClusterPoint).GetSafeNormal();
-				float SlopeAngle = FMath::RadiansToDegrees(FMath::Acos(FVector::DotProduct(Normal, FVector::UpVector)));
-				if (SlopeAngle > 25.0f) continue; // Skip steep slopes
+					FVector Normal = (InterpolatedPoint - ClusterPoint).GetSafeNormal();
+					float SlopeAngle = FMath::RadiansToDegrees(FMath::Acos(FVector::DotProduct(Normal, FVector::UpVector)));
+					if (SlopeAngle < 25.0f)
+					{
+						TooSteep = false; // Exit the loop if the slope is not too steep
+					}
+				}
 
 				FRotator Rotation = InterpolatedPoint.GetSafeNormal().Rotation();
 
-				// Spawn the instance
 				HISM->AddInstance(FTransform(Rotation, InterpolatedPoint, FVector(ScaleFactor)));
 			}
 		}
 	}
+	// Update the instance count
 	InstanceCount = HISM->GetInstanceCount();
 }
